@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учет времени - Красивый дизайн</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            margin: 0 auto;
+            max-width: 95%;
+            transform: scale(0.95);
+        }
+
+        .time-grid {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .time-grid th, 
+        .time-grid td {
+            border: 1px solid #e5e7eb;
+            padding: 12px 15px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .time-grid th {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ЗАГОЛОВКИ КОЛОНОК */
+        .time-grid th:first-child {
+            width: 250px;
+            text-align: left;
+        }
+        
+        .time-grid th:nth-child(2) {
+            width: 220px;
+            text-align: left;
+        }
+        
+        .time-grid th:nth-child(3) {
+            width: 100px;
+        }
+        
+        .time-grid th:nth-child(4) {
+            width: 80px;
+        }
+        
+        .time-grid th:nth-child(5) {
+            width: 80px;
+        }
+        
+        .time-grid th:nth-child(6) {
+            width: 120px;
+        }
+
+        /* ЯЧЕЙКИ СОТРУДНИКОВ */
+        .employee-name {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            font-weight: 700;
+            text-align: left;
+            padding: 18px 22px;
+            width: 250px;
+            vertical-align: middle;
+            border-right: 4px solid #1e40af;
+            font-size: 15px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            word-wrap: break-word;
+            white-space: normal;
+            line-height: 1.3;
+        }
+
+        .employee-input {
+            border: none !important;
+            background: transparent !important;
+            color: white !important;
+            font-weight: 600 !important;
+            width: 100% !important;
+            padding: 4px 0 !important;
+            font-size: 14px !important;
+            outline: none !important;
+            word-wrap: break-word !important;
+            white-space: normal !important;
+            line-height: 1.3 !important;
+            resize: none !important;
+        }
+
+        .employee-input:focus {
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-radius: 4px !important;
+        }
+
+        /* ЯЧЕЙКИ РОЛЕЙ */
+        .role-cell {
+            text-align: left;
+            padding: 14px 18px;
+            width: 220px;
+            font-size: 14px;
+            font-weight: 600;
+            border-left: 4px solid transparent;
+            letter-spacing: 0.2px;
+        }
+
+        /* ЦВЕТОВАЯ СХЕМА РОЛЕЙ */
+        .role-assistant {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left-color: #2563eb;
+            color: #1e40af;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(30, 64, 175, 0.1);
+        }
+
+        .role-overtime {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left-color: #dc2626;
+            color: #991b1b;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(153, 27, 27, 0.1);
+        }
+
+        .role-field {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left-color: #059669;
+            color: #047857;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(4, 120, 87, 0.1);
+        }
+
+        .role-model {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-left-color: #64748b;
+            color: #334155;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(51, 65, 85, 0.1);
+        }
+
+        .role-admin {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left-color: #d97706;
+            color: #92400e;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(146, 64, 14, 0.1);
+        }
+
+        /* ЯЧЕЙКИ ДАННЫХ */
+        .rate-cell {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            width: 100px;
+            font-weight: 700;
+            color: #92400e;
+            border-left: 3px solid #f59e0b;
+            text-shadow: 0 1px 2px rgba(146, 64, 14, 0.1);
+        }
+
+        .total-cell {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            font-weight: 700;
+            width: 80px;
+            color: #1e40af;
+            border-left: 3px solid #2563eb;
+            text-shadow: 0 1px 2px rgba(30, 64, 175, 0.1);
+        }
+
+        .employee-total-amount {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+            color: #047857 !important;
+            font-weight: 800 !important;
+            font-size: 17px !important;
+            text-align: center !important;
+            border-left: 4px solid #059669 !important;
+            width: 120px !important;
+            text-shadow: 0 1px 3px rgba(4, 120, 87, 0.2) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+        }
+
+        /* ЯЧЕЙКИ ВРЕМЕНИ */
+        .time-cell {
+            width: 60px;
+            height: 50px;
+            position: relative;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .time-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 500;
+            color: #475569;
+            padding: 0;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .time-input:focus {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            outline: 2px solid #f59e0b;
+            color: #92400e;
+            font-weight: 600;
+        }
+
+        /* ВЫХОДНЫЕ ДНИ */
+        .weekend {
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%) !important;
+            color: #dc2626 !important;
+        }
+
+        /* ИТОГОВАЯ СТРОКА */
+        .summary-row {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            font-weight: 600;
+            border-top: 3px solid #64748b;
+        }
+
+        .summary-row td {
+            padding: 16px;
+            font-size: 14px;
+        }
+
+        .summary-total {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            color: #047857;
+            font-weight: 700;
+            font-size: 16px;
+            border-left: 4px solid #10b981;
+        }
+
+        /* УПРАВЛЯЮЩИЕ ЭЛЕМЕНТЫ */
+        .controls-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-modern {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ИТОГИ */
+        .totals-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .total-item {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .total-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .total-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* АДАПТИВНОСТЬ */
+        @media (max-width: 1600px) {
+            .employee-name {
+                width: 220px;
+                font-size: 13px;
+                padding: 14px 16px;
+            }
+            
+            .role-cell {
+                width: 190px;
+                font-size: 12px;
+                padding: 10px 14px;
+            }
+        }
+        
+        @media (max-width: 1400px) {
+            .employee-name {
+                width: 200px;
+                font-size: 12px;
+                padding: 12px 14px;
+            }
+            
+            .role-cell {
+                width: 170px;
+                font-size: 11px;
+                padding: 10px 12px;
+            }
+            
+            .time-grid th:first-child {
+                width: 200px;
+            }
+            
+            .time-grid th:nth-child(2) {
+                width: 170px;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .time-grid {
+                font-size: 10px;
+            }
+            
+            .time-grid th, 
+            .time-grid td {
+                padding: 6px 8px;
+            }
+            
+            .employee-name {
+                width: 180px;
+                font-size: 11px;
+                padding: 10px 12px;
+            }
+            
+            .role-cell {
+                width: 150px;
+                font-size: 10px;
+                padding: 8px 10px;
+            }
+            
+            .time-grid th:first-child {
+                width: 180px;
+            }
+            
+            .time-grid th:nth-child(2) {
+                width: 150px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .main-container {
+                padding: 15px;
+            }
+            
+            .table-wrapper {
+                padding: 10px;
+            }
+            
+            .time-grid {
+                font-size: 9px;
+            }
+            
+            .employee-name {
+                width: 160px;
+                font-size: 10px;
+                padding: 8px 10px;
+            }
+            
+            .role-cell {
+                width: 130px;
+                font-size: 9px;
+                padding: 6px 8px;
+            }
+            
+            .time-grid th:first-child {
+                width: 160px;
+            }
+            
+            .time-grid th:nth-child(2) {
+                width: 130px;
+            }
+        }
+
+        /* ЗАГОЛОВОК */
+        .page-title {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 32px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .legend-item {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 4px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+            min-width: 100%;
+        }
+        
+        /* ПОЛОСА ПРОКРУТКИ */
+        .table-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            border-radius: 4px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #64748b, #475569);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <h1 class="page-title">
+            <i class="bi bi-stopwatch me-3"></i>
+            Система учета рабочего времени
+        </h1>
+        
+        <div class="main-container">
+            <!-- Навигация -->
+            <div class="navigation" style="background: rgba(255, 255, 255, 0.9); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center;">
+                <a href="timetracker_beautiful.html" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin: 0 10px; text-decoration: none; display: inline-block;">
+                    <i class="bi bi-table me-2"></i>Основная система
+                </a>
+                <a href="helpers_timetracker.html" class="btn btn-outline-primary" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin: 0 10px; text-decoration: none; display: inline-block;">
+                    <i class="bi bi-people me-2"></i>Хэлперы АХО
+                </a>
+            </div>
+
+            <!-- Управление -->
+            <div class="controls-section">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-outline-primary btn-modern me-2" onclick="changeMonth(-1)">
+                                <i class="bi bi-chevron-left"></i> Пред
+                            </button>
+                            <span class="fw-bold mx-3" id="currentMonth">Август 2024</span>
+                            <button class="btn btn-outline-primary btn-modern ms-2" onclick="changeMonth(1)">
+                                След <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-modern" onclick="saveTimesheet()">
+                                <i class="bi bi-save"></i> Сохранить
+                            </button>
+                            <button class="btn btn-warning btn-modern" onclick="loadFromStorage()">
+                                <i class="bi bi-folder"></i> Загрузить
+                            </button>
+                            <button class="btn btn-info btn-modern" onclick="loadTestData()">
+                                <i class="bi bi-arrow-clockwise"></i> Тест
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <select class="form-select" id="employeeSelect" style="border-radius: 8px;">
+                                <option value="">Выберите сотрудника</option>
+                            </select>
+                            <button class="btn btn-success btn-modern" onclick="addEmployee()">
+                                <i class="bi bi-person-plus"></i> Добавить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Легенда -->
+            <div class="text-center mb-4">
+                <span class="legend-item" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">Ассистент</span>
+                <span class="legend-item" style="background: linear-gradient(135deg, #ef4444, #dc2626);">Переработки</span>
+                <span class="legend-item" style="background: linear-gradient(135deg, #10b981, #047857);">Выездная</span>
+                <span class="legend-item" style="background: linear-gradient(135deg, #6b7280, #374151);">Модель</span>
+                <span class="legend-item" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Администратор</span>
+            </div>
+
+            <!-- Таблица времени -->
+            <div class="table-wrapper">
+                <table class="time-grid" id="timeGrid">
+                    <thead>
+                        <tr>
+                            <th rowspan="3">Сотрудник</th>
+                            <th rowspan="3">Роль</th>
+                            <th rowspan="3">Ставка</th>
+                            <th rowspan="3">Мин</th>
+                            <th rowspan="3">Час</th>
+                            <th rowspan="3">Сумма</th>
+                            <th colspan="40" id="monthHeader">Август 2024</th>
+                        </tr>
+                        <tr id="dayRow"></tr>
+                        <tr id="timeTypeRow"></tr>
+                    </thead>
+                    <tbody id="gridBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Итоги -->
+            <div class="totals-section">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="total-item">
+                            <div class="total-label">Общие минуты</div>
+                            <div class="total-value text-primary" id="totalMinutes">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="total-item">
+                            <div class="total-label">Общие часы</div>
+                            <div class="total-value text-info" id="totalHours">0.00</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="total-item">
+                            <div class="total-label">Общая сумма</div>
+                            <div class="total-value text-success" id="totalAmount">0₽</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="total-item">
+                            <div class="total-label">Рабочих дней</div>
+                            <div class="total-value text-warning" id="workingDays">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="total-item">
+                            <div class="total-label">В среднем/день</div>
+                            <div class="total-value text-secondary" id="avgDaily">0₽</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="total-item">
+                            <div class="total-label">В среднем/час</div>
+                            <div class="total-value text-dark" id="avgHourly">0₽</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDate = new Date(2024, 7, 1);
+        let employees = [];
+        let roles = [];
+        let timeData = {};
+
+        function initializeData() {
+            employees = [
+                {id: 1, name: 'Яна Дым'},
+                {id: 2, name: 'Илья Полумягкий'},
+                {id: 3, name: 'Ковач Андриана Ивановна'},
+                {id: 4, name: 'Кузьмина Кристина'},
+                {id: 5, name: 'Соколов Савелий Алексеевич'}
+            ];
+
+            roles = [
+                {id: 1, name: 'Ассистент', rate: 312.50, colorClass: 'role-assistant'},
+                {id: 2, name: 'Ассистент, переработки', rate: 350.00, colorClass: 'role-overtime'},
+                {id: 3, name: 'Выездная', rate: 500.00, colorClass: 'role-field'},
+                {id: 4, name: 'Модель', rate: 500.00, colorClass: 'role-model'},
+                {id: 5, name: 'Администратор', rate: 375.00, colorClass: 'role-admin'}
+            ];
+
+            const employeeSelect = document.getElementById('employeeSelect');
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = emp.name;
+                employeeSelect.appendChild(option);
+            });
+        }
+
+        function generateTimeGrid() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                              'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            
+            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+            document.getElementById('monthHeader').textContent = `${monthNames[month]} ${year}`;
+            document.getElementById('monthHeader').setAttribute('colspan', daysInMonth * 2);
+
+            const dayRow = document.getElementById('dayRow');
+            const timeTypeRow = document.getElementById('timeTypeRow');
+            
+            dayRow.innerHTML = '';
+            timeTypeRow.innerHTML = '';
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                
+                const dayTh = document.createElement('th');
+                dayTh.setAttribute('colspan', 2);
+                dayTh.innerHTML = `${dayNames[date.getDay()]}<br>${day}`;
+                if (isWeekend) dayTh.classList.add('weekend');
+                dayRow.appendChild(dayTh);
+
+                const arrivalTh = document.createElement('th');
+                arrivalTh.textContent = 'Пр';
+                if (isWeekend) arrivalTh.classList.add('weekend');
+                timeTypeRow.appendChild(arrivalTh);
+
+                const departureTh = document.createElement('th');
+                departureTh.textContent = 'Ух';
+                if (isWeekend) departureTh.classList.add('weekend');
+                timeTypeRow.appendChild(departureTh);
+            }
+
+            document.getElementById('gridBody').innerHTML = '';
+            timeData = {};
+            updateTotals();
+        }
+
+        function addEmployee() {
+            const employeeId = document.getElementById('employeeSelect').value;
+            if (!employeeId) {
+                alert('Выберите сотрудника');
+                return;
+            }
+
+            const existingEmployee = Object.keys(timeData).find(rowId => {
+                return timeData[rowId].employeeId == employeeId;
+            });
+
+            if (existingEmployee) {
+                alert('Этот сотрудник уже добавлен');
+                return;
+            }
+
+            const employee = employees.find(e => e.id == employeeId);
+            const timestamp = Date.now();
+            
+            roles.forEach((role, index) => {
+                const rowId = `${employeeId}_${role.id}_${timestamp + index}`;
+                timeData[rowId] = {
+                    employeeId: employeeId,
+                    employeeName: employee.name,
+                    roleId: role.id,
+                    roleName: role.name,
+                    rate: role.rate,
+                    colorClass: role.colorClass,
+                    times: {},
+                    createdAt: timestamp + index
+                };
+            });
+            
+            renderRows();
+            showNotification(`Сотрудник "${employee.name}" добавлен со всеми ролями`, 'success');
+        }
+
+        function updateEmployeeName(employeeId, newName) {
+            Object.keys(timeData).forEach(rowId => {
+                if (timeData[rowId].employeeId == employeeId) {
+                    timeData[rowId].employeeName = newName;
+                }
+            });
+            saveTimesheet();
+        }
+
+        function renderRows() {
+            const tbody = document.getElementById('gridBody');
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            tbody.innerHTML = '';
+
+            const employeeGroups = {};
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                if (!employeeGroups[data.employeeId]) {
+                    employeeGroups[data.employeeId] = {
+                        name: data.employeeName,
+                        roles: []
+                    };
+                }
+                employeeGroups[data.employeeId].roles.push({ rowId, data });
+            });
+
+            Object.keys(employeeGroups).forEach(employeeId => {
+                const group = employeeGroups[employeeId];
+                let employeeTotal = 0;
+                let employeeTotalAmount = 0;
+
+                // Считаем итоги для сотрудника
+                group.roles.forEach(({ rowId, data }) => {
+                    let rowMinutes = 0;
+                    Object.values(data.times).forEach(timeEntry => {
+                        rowMinutes += calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                    });
+                    const rowHours = rowMinutes / 60;
+                    const rowAmount = rowHours * data.rate;
+                    employeeTotal += rowHours;
+                    employeeTotalAmount += rowAmount;
+                });
+                
+                group.roles.forEach((roleData, roleIndex) => {
+                    const { rowId, data } = roleData;
+                    const tr = document.createElement('tr');
+
+                    // Ячейка сотрудника (только для первой роли)
+                    if (roleIndex === 0) {
+                        const employeeCell = document.createElement('td');
+                        employeeCell.className = 'employee-name';
+                        employeeCell.innerHTML = `<input type="text" class="employee-input" value="${data.employeeName}" 
+                            onchange="updateEmployeeName(${data.employeeId}, this.value)"/>`;
+                        employeeCell.rowSpan = group.roles.length + 1;
+                        tr.appendChild(employeeCell);
+                    }
+
+                    // Ячейка роли
+                    const roleCell = document.createElement('td');
+                    roleCell.className = `role-cell ${data.colorClass}`;
+                    roleCell.textContent = data.roleName;
+                    tr.appendChild(roleCell);
+
+                    // Ячейка ставки
+                    const rateCell = document.createElement('td');
+                    rateCell.className = 'rate-cell';
+                    rateCell.textContent = data.rate + '₽';
+                    tr.appendChild(rateCell);
+
+                    // Минуты отработано
+                    const minutesCell = document.createElement('td');
+                    minutesCell.className = 'total-cell';
+                    minutesCell.id = `minutes_${rowId}`;
+                    tr.appendChild(minutesCell);
+
+                    // Часы отработано
+                    const hoursCell = document.createElement('td');
+                    hoursCell.className = 'total-cell';
+                    hoursCell.id = `hours_${rowId}`;
+                    tr.appendChild(hoursCell);
+
+                    // К начислению (только в первой строке)
+                    if (roleIndex === 0) {
+                        const amountCell = document.createElement('td');
+                        amountCell.className = 'employee-total-amount';
+                        amountCell.id = `employee_amount_${data.employeeId}`;
+                        amountCell.rowSpan = group.roles.length;
+                        amountCell.innerHTML = `₽${Math.round(employeeTotalAmount)}`;
+                        tr.appendChild(amountCell);
+                    }
+
+                    // Ячейки времени
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const date = new Date(year, month, day);
+                        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                        
+                        // Приход
+                        const arrivalCell = document.createElement('td');
+                        arrivalCell.className = 'time-cell';
+                        if (isWeekend) arrivalCell.classList.add('weekend');
+                        
+                        const arrivalInput = document.createElement('input');
+                        arrivalInput.type = 'time';
+                        arrivalInput.className = 'time-input';
+                        arrivalInput.value = data.times[day]?.arrival || '';
+                        arrivalInput.addEventListener('change', function() {
+                            updateTimeValue(rowId, day, 'arrival', this.value);
+                        });
+                        
+                        arrivalCell.appendChild(arrivalInput);
+                        tr.appendChild(arrivalCell);
+
+                        // Уход
+                        const departureCell = document.createElement('td');
+                        departureCell.className = 'time-cell';
+                        if (isWeekend) departureCell.classList.add('weekend');
+                        
+                        const departureInput = document.createElement('input');
+                        departureInput.type = 'time';
+                        departureInput.className = 'time-input';
+                        departureInput.value = data.times[day]?.departure || '';
+                        departureInput.addEventListener('change', function() {
+                            updateTimeValue(rowId, day, 'departure', this.value);
+                        });
+                        
+                        departureCell.appendChild(departureInput);
+                        tr.appendChild(departureCell);
+                    }
+
+                    tbody.appendChild(tr);
+                });
+
+                // Итоговая строка
+                const totalTr = document.createElement('tr');
+                totalTr.className = 'summary-row';
+
+                const totalRoleCell = document.createElement('td');
+                totalRoleCell.innerHTML = '<strong>Итого часов отработано</strong>';
+                totalRoleCell.style.textAlign = 'left';
+                totalRoleCell.style.fontWeight = '700';
+                totalRoleCell.colSpan = 2;
+                totalTr.appendChild(totalRoleCell);
+
+                // Пустые ячейки для ставка и минут
+                for (let i = 0; i < 2; i++) {
+                    const emptyCell = document.createElement('td');
+                    totalTr.appendChild(emptyCell);
+                }
+
+                const totalHoursCell = document.createElement('td');
+                totalHoursCell.className = 'summary-total';
+                totalHoursCell.innerHTML = `<strong>${employeeTotal.toFixed(2)}</strong>`;
+                totalTr.appendChild(totalHoursCell);
+
+                const totalAmountCell = document.createElement('td');
+                totalAmountCell.className = 'summary-total';
+                totalAmountCell.innerHTML = `<strong>₽${Math.round(employeeTotalAmount)}</strong>`;
+                totalTr.appendChild(totalAmountCell);
+
+                // Пустые ячейки для дней
+                for (let day = 1; day <= daysInMonth; day++) {
+                    for (let timeType = 0; timeType < 2; timeType++) {
+                        const emptyCell = document.createElement('td');
+                        totalTr.appendChild(emptyCell);
+                    }
+                }
+
+                tbody.appendChild(totalTr);
+            });
+
+            updateTotals();
+        }
+
+        function updateTimeValue(rowId, day, type, value) {
+            if (!timeData[rowId]) return;
+            
+            if (!timeData[rowId].times[day]) {
+                timeData[rowId].times[day] = {};
+            }
+            
+            if (value) {
+                const otherType = type === 'arrival' ? 'departure' : 'arrival';
+                const otherValue = timeData[rowId].times[day][otherType];
+                
+                if (otherValue && !validateTimeOrder(type === 'arrival' ? value : otherValue, type === 'arrival' ? otherValue : value)) {
+                    showNotification('Время прихода должно быть раньше времени ухода!', 'error');
+                    return;
+                }
+            }
+            
+            timeData[rowId].times[day][type] = value;
+            renderRows();
+            saveTimesheet();
+        }
+
+        function validateTimeOrder(arrivalTime, departureTime) {
+            if (!arrivalTime || !departureTime) return true;
+            
+            const [arrHour, arrMin] = arrivalTime.split(':').map(Number);
+            const [depHour, depMin] = departureTime.split(':').map(Number);
+            
+            const arrivalMinutes = arrHour * 60 + arrMin;
+            const departureMinutes = depHour * 60 + depMin;
+            
+            return arrivalMinutes < departureMinutes;
+        }
+
+        function calculateMinutes(arrival, departure) {
+            if (!arrival || !departure) return 0;
+            
+            const [arrHour, arrMin] = arrival.split(':').map(Number);
+            const [depHour, depMin] = departure.split(':').map(Number);
+            
+            const arrivalMinutes = arrHour * 60 + arrMin;
+            const departureMinutes = depHour * 60 + depMin;
+            
+            let diff = departureMinutes - arrivalMinutes;
+            if (diff < 0) diff += 24 * 60;
+            
+            return diff;
+        }
+
+        function updateTotals() {
+            let grandTotalMinutes = 0;
+            let grandTotalAmount = 0;
+            let workingDaysCount = 0;
+
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                let rowMinutes = 0;
+                let rowAmount = 0;
+
+                Object.values(data.times).forEach(timeEntry => {
+                    const minutes = calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                    rowMinutes += minutes;
+                });
+
+                const rowHours = rowMinutes / 60;
+                rowAmount = rowHours * data.rate;
+                
+                grandTotalMinutes += rowMinutes;
+                grandTotalAmount += rowAmount;
+
+                if (Object.keys(data.times).length > 0) {
+                    workingDaysCount = Math.max(workingDaysCount, Object.keys(data.times).length);
+                }
+
+                const minutesCell = document.getElementById(`minutes_${rowId}`);
+                const hoursCell = document.getElementById(`hours_${rowId}`);
+                
+                if (minutesCell) minutesCell.textContent = rowMinutes;
+                if (hoursCell) hoursCell.textContent = rowHours.toFixed(2);
+            });
+
+            const grandTotalHours = grandTotalMinutes / 60;
+
+            document.getElementById('totalMinutes').textContent = grandTotalMinutes;
+            document.getElementById('totalHours').textContent = grandTotalHours.toFixed(2);
+            document.getElementById('totalAmount').textContent = Math.round(grandTotalAmount) + '₽';
+            document.getElementById('workingDays').textContent = workingDaysCount;
+            document.getElementById('avgDaily').textContent = workingDaysCount > 0 ? 
+                Math.round(grandTotalAmount / workingDaysCount) + '₽' : '0₽';
+            document.getElementById('avgHourly').textContent = grandTotalHours > 0 ? 
+                Math.round(grandTotalAmount / grandTotalHours) + '₽' : '0₽';
+        }
+
+        function loadTestData() {
+            timeData = {};
+
+            const testEmployees = [4, 1];
+            
+            testEmployees.forEach((empId, empIndex) => {
+                const employee = employees.find(e => e.id == empId);
+                const timestamp = Date.now() + empIndex * 1000;
+                
+                roles.forEach((role, roleIndex) => {
+                    const rowId = `${empId}_${role.id}_${timestamp + roleIndex}`;
+                    
+                    timeData[rowId] = {
+                        employeeId: empId,
+                        employeeName: employee.name,
+                        roleId: role.id,
+                        roleName: role.name,
+                        rate: role.rate,
+                        colorClass: role.colorClass,
+                        times: {},
+                        createdAt: timestamp + roleIndex
+                    };
+                });
+            });
+
+            const rowKeys = Object.keys(timeData);
+            if (rowKeys.length > 0) {
+                if (rowKeys[0]) timeData[rowKeys[0]].times[23] = {arrival: '09:00', departure: '14:00'};
+            }
+
+            renderRows();
+            showNotification('Тестовые данные загружены!', 'success');
+        }
+
+        function saveTimesheet() {
+            const savedData = {
+                timeData: timeData,
+                currentDate: currentDate.toISOString(),
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('timesheetData', JSON.stringify(savedData));
+            showNotification('Данные сохранены!', 'success');
+        }
+
+        function loadFromStorage() {
+            const savedData = localStorage.getItem('timesheetData');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    
+                    if (parsed.timeData) {
+                        timeData = parsed.timeData;
+                        if (parsed.currentDate) {
+                            currentDate = new Date(parsed.currentDate);
+                            generateTimeGrid();
+                        }
+                    } else {
+                        timeData = parsed;
+                    }
+                    
+                    renderRows();
+                    showNotification('Данные загружены!', 'success');
+                } catch (e) {
+                    showNotification('Ошибка загрузки: ' + e.message, 'error');
+                }
+            } else {
+                showNotification('Нет сохраненных данных', 'error');
+            }
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            generateTimeGrid();
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-info';
+            notification.className = `alert ${alertClass} position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);';
+            notification.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${message}</span>
+                    <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 4000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeData();
+            generateTimeGrid();
+            
+            const savedData = localStorage.getItem('timesheetData');
+            if (savedData) {
+                showNotification('📂 Найдены сохраненные данные. Нажмите "Загрузить"', 'info');
+            } else {
+                setTimeout(() => {
+                    loadTestData();
+                    showNotification('✨ Загружены тестовые данные для демонстрации', 'success');
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учет времени хэлперов АХО</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            margin: 0 auto;
+            max-width: 95%;
+            transform: scale(0.95);
+        }
+
+        .page-title {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 32px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .navigation {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 0 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .controls-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .helper-grid {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .helper-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .helper-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .helper-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        .time-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .time-display {
+            font-size: 24px;
+            font-weight: 700;
+            color: #059669;
+            text-shadow: 0 1px 2px rgba(5, 150, 105, 0.2);
+        }
+
+        .status-indicator {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-working {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #047857;
+        }
+
+        .status-break {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #d97706;
+        }
+
+        .status-finished {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            color: #374151;
+        }
+
+        .btn-modern {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .summary-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .summary-card {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .date-selector {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .time-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-btn {
+                margin: 5px;
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <h1 class="page-title">
+            <i class="bi bi-people me-3"></i>
+            Учет времени хэлперов АХО
+        </h1>
+
+        <div class="main-container">
+            <!-- Навигация -->
+            <div class="navigation">
+                <a href="timetracker_beautiful.html" class="nav-btn btn-outline-primary">
+                    <i class="bi bi-table me-2"></i>Основная система
+                </a>
+                <a href="helpers_timetracker.html" class="nav-btn btn-primary">
+                    <i class="bi bi-people me-2"></i>Хэлперы АХО
+                </a>
+            </div>
+
+            <!-- Управление -->
+            <div class="controls-section">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <input type="date" class="date-selector me-3" id="currentDate">
+                            <button class="btn btn-outline-secondary btn-modern" onclick="setToday()">
+                                <i class="bi bi-calendar-today"></i> Сегодня
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-modern" onclick="saveData()">
+                                <i class="bi bi-save"></i> Сохранить
+                            </button>
+                            <button class="btn btn-warning btn-modern" onclick="loadData()">
+                                <i class="bi bi-folder"></i> Загрузить
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control" id="newHelperName" placeholder="Имя нового хэлпера" style="border-radius: 8px;">
+                            <button class="btn btn-success btn-modern" onclick="addHelper()">
+                                <i class="bi bi-person-plus"></i> Добавить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Список хэлперов -->
+            <div class="helper-grid" id="helpersContainer">
+                <!-- Динамически генерируемые карточки хэлперов -->
+            </div>
+
+            <!-- Итоги -->
+            <div class="summary-section">
+                <h4 class="mb-4 text-center">Сводка за день</h4>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-label">Всего хэлперов</div>
+                        <div class="summary-value text-primary" id="totalHelpers">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">На работе</div>
+                        <div class="summary-value text-success" id="workingHelpers">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Отработанных часов</div>
+                        <div class="summary-value text-info" id="totalHours">0.00</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Средняя смена</div>
+                        <div class="summary-value text-secondary" id="avgShift">0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDate = new Date();
+        let helpersData = {};
+
+        function initializeData() {
+            // Тестовые хэлперы
+            const testHelpers = [
+                { id: 1, name: 'Мария Петрова' },
+                { id: 2, name: 'Алексей Сидоров' },
+                { id: 3, name: 'Екатерина Волкова' }
+            ];
+
+            const today = getCurrentDateString();
+            if (!helpersData[today]) {
+                helpersData[today] = {};
+            }
+
+            testHelpers.forEach(helper => {
+                if (!helpersData[today][helper.id]) {
+                    helpersData[today][helper.id] = {
+                        id: helper.id,
+                        name: helper.name,
+                        status: 'finished', // working, break, finished
+                        startTime: null,
+                        endTime: null,
+                        breaks: [],
+                        totalMinutes: 0
+                    };
+                }
+            });
+
+            updateDateSelector();
+            renderHelpers();
+            updateSummary();
+        }
+
+        function getCurrentDateString() {
+            return currentDate.toISOString().split('T')[0];
+        }
+
+        function updateDateSelector() {
+            document.getElementById('currentDate').value = getCurrentDateString();
+        }
+
+        function setToday() {
+            currentDate = new Date();
+            updateDateSelector();
+            renderHelpers();
+            updateSummary();
+        }
+
+        function addHelper() {
+            const name = document.getElementById('newHelperName').value.trim();
+            if (!name) {
+                showNotification('Введите имя хэлпера', 'error');
+                return;
+            }
+
+            const today = getCurrentDateString();
+            if (!helpersData[today]) {
+                helpersData[today] = {};
+            }
+
+            const newId = Date.now();
+            helpersData[today][newId] = {
+                id: newId,
+                name: name,
+                status: 'finished',
+                startTime: null,
+                endTime: null,
+                breaks: [],
+                totalMinutes: 0
+            };
+
+            document.getElementById('newHelperName').value = '';
+            renderHelpers();
+            updateSummary();
+            showNotification(`Хэлпер "${name}" добавлен`, 'success');
+        }
+
+        function renderHelpers() {
+            const container = document.getElementById('helpersContainer');
+            const today = getCurrentDateString();
+            
+            if (!helpersData[today]) {
+                container.innerHTML = '<div class="text-center text-muted py-5">Нет данных за выбранную дату</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            Object.values(helpersData[today]).forEach(helper => {
+                const card = createHelperCard(helper);
+                container.appendChild(card);
+            });
+        }
+
+        function createHelperCard(helper) {
+            const card = document.createElement('div');
+            card.className = 'helper-card';
+            
+            const statusClass = helper.status === 'working' ? 'status-working' : 
+                               helper.status === 'break' ? 'status-break' : 'status-finished';
+            
+            const statusText = helper.status === 'working' ? 'На работе' : 
+                              helper.status === 'break' ? 'Перерыв' : 'Завершил';
+
+            const timeDisplay = helper.totalMinutes > 0 ? 
+                `${Math.floor(helper.totalMinutes / 60)}:${(helper.totalMinutes % 60).toString().padStart(2, '0')}` : 
+                '0:00';
+
+            card.innerHTML = `
+                <div class="helper-name">${helper.name}</div>
+                <div class="time-controls">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="status-indicator ${statusClass}">${statusText}</span>
+                        <div class="time-display">${timeDisplay}</div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success btn-modern btn-sm" onclick="startWork(${helper.id})" 
+                                ${helper.status === 'working' ? 'disabled' : ''}>
+                            <i class="bi bi-play"></i> Начать
+                        </button>
+                        <button class="btn btn-warning btn-modern btn-sm" onclick="takeBreak(${helper.id})" 
+                                ${helper.status !== 'working' ? 'disabled' : ''}>
+                            <i class="bi bi-pause"></i> Перерыв
+                        </button>
+                        <button class="btn btn-danger btn-modern btn-sm" onclick="finishWork(${helper.id})" 
+                                ${helper.status === 'finished' ? 'disabled' : ''}>
+                            <i class="bi bi-stop"></i> Завершить
+                        </button>
+                        <button class="btn btn-outline-danger btn-modern btn-sm" onclick="removeHelper(${helper.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function startWork(helperId) {
+            const today = getCurrentDateString();
+            const helper = helpersData[today][helperId];
+            
+            if (!helper) return;
+
+            const now = new Date();
+            
+            if (helper.status === 'finished') {
+                // Начинаем новую смену
+                helper.startTime = now.getTime();
+                helper.endTime = null;
+                helper.breaks = [];
+            } else if (helper.status === 'break') {
+                // Возвращаемся с перерыва
+                const lastBreak = helper.breaks[helper.breaks.length - 1];
+                if (lastBreak && !lastBreak.end) {
+                    lastBreak.end = now.getTime();
+                }
+            }
+            
+            helper.status = 'working';
+            renderHelpers();
+            updateSummary();
+            showNotification(`${helper.name} начал работу`, 'success');
+        }
+
+        function takeBreak(helperId) {
+            const today = getCurrentDateString();
+            const helper = helpersData[today][helperId];
+            
+            if (!helper || helper.status !== 'working') return;
+
+            const now = new Date();
+            helper.status = 'break';
+            helper.breaks.push({ start: now.getTime(), end: null });
+            
+            renderHelpers();
+            updateSummary();
+            showNotification(`${helper.name} ушел на перерыв`, 'info');
+        }
+
+        function finishWork(helperId) {
+            const today = getCurrentDateString();
+            const helper = helpersData[today][helperId];
+            
+            if (!helper) return;
+
+            const now = new Date();
+            
+            // Закрываем текущий перерыв если есть
+            if (helper.status === 'break') {
+                const lastBreak = helper.breaks[helper.breaks.length - 1];
+                if (lastBreak && !lastBreak.end) {
+                    lastBreak.end = now.getTime();
+                }
+            }
+            
+            helper.endTime = now.getTime();
+            helper.status = 'finished';
+            
+            // Пересчитываем общее время
+            calculateTotalTime(helper);
+            
+            renderHelpers();
+            updateSummary();
+            showNotification(`${helper.name} завершил работу`, 'success');
+        }
+
+        function calculateTotalTime(helper) {
+            if (!helper.startTime || !helper.endTime) {
+                helper.totalMinutes = 0;
+                return;
+            }
+
+            let totalMinutes = (helper.endTime - helper.startTime) / (1000 * 60);
+            
+            // Вычитаем время перерывов
+            helper.breaks.forEach(breakPeriod => {
+                if (breakPeriod.start && breakPeriod.end) {
+                    totalMinutes -= (breakPeriod.end - breakPeriod.start) / (1000 * 60);
+                }
+            });
+            
+            helper.totalMinutes = Math.max(0, Math.round(totalMinutes));
+        }
+
+        function removeHelper(helperId) {
+            if (!confirm('Удалить хэлпера?')) return;
+            
+            const today = getCurrentDateString();
+            if (helpersData[today] && helpersData[today][helperId]) {
+                delete helpersData[today][helperId];
+                renderHelpers();
+                updateSummary();
+                showNotification('Хэлпер удален', 'success');
+            }
+        }
+
+        function updateSummary() {
+            const today = getCurrentDateString();
+            const helpers = helpersData[today] ? Object.values(helpersData[today]) : [];
+            
+            const totalHelpers = helpers.length;
+            const workingHelpers = helpers.filter(h => h.status === 'working' || h.status === 'break').length;
+            const totalMinutes = helpers.reduce((sum, h) => {
+                if (h.status === 'finished') {
+                    return sum + h.totalMinutes;
+                } else if (h.status === 'working' || h.status === 'break') {
+                    // Для работающих считаем текущее время
+                    const tempHelper = { ...h };
+                    tempHelper.endTime = new Date().getTime();
+                    calculateTotalTime(tempHelper);
+                    return sum + tempHelper.totalMinutes;
+                }
+                return sum;
+            }, 0);
+            
+            const totalHours = totalMinutes / 60;
+            const avgShift = totalHelpers > 0 ? totalHours / totalHelpers : 0;
+
+            document.getElementById('totalHelpers').textContent = totalHelpers;
+            document.getElementById('workingHelpers').textContent = workingHelpers;
+            document.getElementById('totalHours').textContent = totalHours.toFixed(2);
+            document.getElementById('avgShift').textContent = avgShift.toFixed(2);
+        }
+
+        function saveData() {
+            const dataToSave = {
+                helpersData: helpersData,
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('helpersData', JSON.stringify(dataToSave));
+            showNotification('Данные сохранены!', 'success');
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('helpersData');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    helpersData = parsed.helpersData || {};
+                    renderHelpers();
+                    updateSummary();
+                    showNotification('Данные загружены!', 'success');
+                } catch (e) {
+                    showNotification('Ошибка загрузки: ' + e.message, 'error');
+                }
+            } else {
+                showNotification('Нет сохраненных данных', 'error');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-info';
+            notification.className = `alert ${alertClass} position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);';
+            notification.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${message}</span>
+                    <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 4000);
+        }
+
+        // Обновляем данные при смене даты
+        document.getElementById('currentDate').addEventListener('change', function() {
+            const selectedDate = this.value;
+            currentDate = new Date(selectedDate + 'T00:00:00');
+            renderHelpers();
+            updateSummary();
+        });
+
+        // Автоматическое обновление времени каждую минуту
+        setInterval(updateSummary, 60000);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeData();
+            
+            // Автозагрузка данных если есть
+            const savedData = localStorage.getItem('helpersData');
+            if (savedData) {
+                showNotification('📂 Найдены сохраненные данные. Нажмите "Загрузить"', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

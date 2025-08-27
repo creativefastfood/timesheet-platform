@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Демо - Учет рабочего времени ассистентов</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        .demo-card {
+            margin-bottom: 20px;
+            border-left: 4px solid #0d6efd;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            color: #0d6efd;
+        }
+        .step-number {
+            background: #0d6efd;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">
+                <i class="bi bi-clock-history text-primary"></i>
+                Платформа учета рабочего времени
+            </h1>
+            <p class="lead">Интерактивная система для ведения табелей ассистентов с интеграцией в Битрикс24</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="index.html" class="btn btn-primary btn-lg">
+                    <i class="bi bi-play-circle"></i> Начать работу
+                </a>
+                <button class="btn btn-outline-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    <i class="bi bi-box-arrow-in-right"></i> Вход в систему
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card demo-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-person-plus feature-icon me-3"></i>
+                            <h4>Многоролевость</h4>
+                        </div>
+                        <p>Один сотрудник может работать в разных ролях в течение дня:</p>
+                        <ul>
+                            <li><strong>Ассистент</strong> - 312,50₽/час</li>
+                            <li><strong>Переработки</strong> - 350₽/час</li>
+                            <li><strong>Выездная съемка</strong> - 500₽/час</li>
+                            <li><strong>Модель</strong> - 500₽/час</li>
+                            <li><strong>Администратор</strong> - 375₽/час</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card demo-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-graph-up-arrow feature-icon me-3"></i>
+                            <h4>Автоматические расчеты</h4>
+                        </div>
+                        <p>Система автоматически:</p>
+                        <ul>
+                            <li>Рассчитывает заработную плату</li>
+                            <li>Формирует табели по периодам</li>
+                            <li>Создает сводные отчеты</li>
+                            <li>Экспортирует данные в Excel</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card demo-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-diagram-3 feature-icon me-3"></i>
+                            <h4>Интеграция с Битрикс24</h4>
+                        </div>
+                        <p>Полная интеграция с CRM:</p>
+                        <ul>
+                            <li>Синхронизация сотрудников</li>
+                            <li>Создание задач из табелей</li>
+                            <li>Автоматические сделки</li>
+                            <li>Отправка отчетов в проекты</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card demo-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-shield-check feature-icon me-3"></i>
+                            <h4>Безопасность</h4>
+                        </div>
+                        <p>Система обеспечивает:</p>
+                        <ul>
+                            <li>Разграничение прав доступа</li>
+                            <li>Безопасное хранение данных</li>
+                            <li>Аудит всех операций</li>
+                            <li>Защищенные API вызовы</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3><i class="bi bi-list-check"></i> Как пользоваться системой</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><span class="step-number">1</span>Добавление смен</h5>
+                                <p>На вкладке "Ввод данных" выберите сотрудника, роль, дату и укажите количество отработанных часов. Система автоматически рассчитает оплату.</p>
+
+                                <h5><span class="step-number">2</span>Просмотр табелей</h5>
+                                <p>На вкладке "Табель" выберите период и получите детальный отчет по всем сотрудникам с возможностью экспорта в Excel.</p>
+
+                                <h5><span class="step-number">3</span>Анализ данных</h5>
+                                <p>В разделе "Отчеты" доступны месячные сводки и календарные табели для анализа эффективности работы.</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><span class="step-number">4</span>Управление сотрудниками</h5>
+                                <p>Добавляйте новых сотрудников в систему или синхронизируйте с Битрикс24 для автоматического импорта.</p>
+
+                                <h5><span class="step-number">5</span>Интеграция с CRM</h5>
+                                <p>Настройте интеграцию с Битрикс24 для автоматической отправки табелей и создания сделок на основе отработанного времени.</p>
+
+                                <h5><span class="step-number">6</span>Экспорт отчетов</h5>
+                                <p>Экспортируйте данные в различных форматах: детальные табели, сводные отчеты или календарные представления.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h4>📊 Демонстрационные данные загружены</h4>
+                        <p class="mb-3">В системе уже есть тестовые данные для демонстрации возможностей:</p>
+                        <div class="row text-start">
+                            <div class="col-md-4">
+                                <strong>5 сотрудников:</strong>
+                                <ul class="list-unstyled ms-3">
+                                    <li>• Яна</li>
+                                    <li>• Илья Полумягкий</li>
+                                    <li>• Ковач Андриана</li>
+                                    <li>• Кузьмина Кристина</li>
+                                    <li>• Соколов Савелий</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Рабочие смены:</strong>
+                                <ul class="list-unstyled ms-3">
+                                    <li>• Август 2024 (основной период)</li>
+                                    <li>• Июль 2024 (прошлый месяц)</li>
+                                    <li>• Сентябрь 2024 (будущий)</li>
+                                    <li>• 40+ записей для анализа</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Итоги августа:</strong>
+                                <ul class="list-unstyled ms-3">
+                                    <li>• <strong>113,263₽</strong> общая сумма</li>
+                                    <li>• Разные роли и ставки</li>
+                                    <li>• Готовые отчеты</li>
+                                    <li>• Экспорт в Excel</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <a href="index.html" class="btn btn-primary btn-lg me-3">
+                                <i class="bi bi-play-circle-fill"></i> Попробовать сейчас
+                            </a>
+                            <button class="btn btn-outline-primary btn-lg" onclick="showDemoCredentials()">
+                                <i class="bi bi-key"></i> Данные для входа
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно входа -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Вход в систему</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Логин</label>
+                            <input type="text" class="form-control" id="username" placeholder="admin">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="password" placeholder="password">
+                        </div>
+                        <div class="alert alert-info">
+                            <small>
+                                <strong>Тестовые учетные данные:</strong><br>
+                                Администратор: admin / password<br>
+                                Менеджер: manager / password<br>
+                                Сотрудник: yana / password
+                            </small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary">Войти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showDemoCredentials() {
+            alert(`Демонстрационные учетные данные:
+
+👨‍💼 Администратор:
+Логин: admin
+Пароль: password
+
+👩‍💼 Менеджер:
+Логин: manager  
+Пароль: password
+
+👤 Сотрудник:
+Логин: yana
+Пароль: password
+
+Все пароли зашифрованы в базе данных для безопасности.`);
+        }
+    </script>
+</body>
+</html>

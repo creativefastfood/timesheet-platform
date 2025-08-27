@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учет времени - Временные интервалы</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        .time-grid {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 11px;
+        }
+        .time-grid th, .time-grid td {
+            border: 1px solid #ddd;
+            padding: 2px 4px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .time-grid th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .employee-name {
+            background-color: #e9ecef;
+            font-weight: bold;
+            text-align: left;
+            padding-left: 8px;
+            width: 140px;
+            vertical-align: top;
+            border-right: 2px solid #495057;
+        }
+        .role-cell {
+            background-color: #f8f9fa;
+            text-align: left;
+            padding-left: 8px;
+            width: 100px;
+            font-size: 10px;
+        }
+        .rate-cell {
+            background-color: #fff3cd;
+            width: 70px;
+            font-size: 10px;
+        }
+        .time-cell {
+            width: 30px;
+            height: 30px;
+            position: relative;
+        }
+        .time-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 9px;
+            padding: 0;
+        }
+        .time-input:focus {
+            background-color: #fff3cd;
+            outline: 1px solid #0d6efd;
+        }
+        .worked-time {
+            background-color: #d1ecf1 !important;
+        }
+        .overtime {
+            background-color: #f8d7da !important;
+        }
+        .field-work {
+            background-color: #d4edda !important;
+        }
+        .model-work {
+            background-color: #e2e3e5 !important;
+        }
+        .weekend {
+            background-color: #ffe6e6;
+        }
+        .total-cell {
+            background-color: #d1ecf1;
+            font-weight: bold;
+            width: 80px;
+        }
+        .summary-row {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .deal-cell {
+            width: 120px;
+            font-size: 10px;
+            background-color: #f0f8ff;
+        }
+        .actions-cell {
+            width: 80px;
+            background-color: #fff8dc;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+        .duplicate-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 10px;
+            margin-left: 2px;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .stat-card {
+            border-left: 4px solid #0d6efd;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+        .employee-stats {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .employee-header {
+            background: linear-gradient(135deg, #0d6efd, #0056b3);
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+        .role-stats {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .role-stats:last-child {
+            border-bottom: none;
+        }
+        .time-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .time-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-3">
+        <h2><i class="bi bi-stopwatch"></i> Учет рабочего времени - Временные интервалы</h2>
+        
+        <!-- Навигация -->
+        <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="timesheet-tab" data-bs-toggle="tab" data-bs-target="#timesheet">
+                    <i class="bi bi-table"></i> Табель времени
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats">
+                    <i class="bi bi-bar-chart"></i> Статистика
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis">
+                    <i class="bi bi-pie-chart"></i> Аналитика
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="mainTabContent">
+            <!-- Вкладка табеля -->
+            <div class="tab-pane fade show active" id="timesheet" role="tabpanel">
+                <!-- Управление -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary" onclick="changeMonth(-1)">← Предыдущий</button>
+                        <span class="mx-2" id="currentMonth">Август 2024</span>
+                        <button class="btn btn-outline-primary" onclick="changeMonth(1)">Следующий →</button>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-success" onclick="saveTimesheet()" title="Сохранить данные в браузере">💾 Сохранить</button>
+                            <button class="btn btn-warning" onclick="loadFromStorage()" title="Загрузить сохраненные данные">📂 Загрузить</button>
+                            <button class="btn btn-info" onclick="loadTestData()" title="Загрузить тестовые данные">🔄 Тест</button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-primary" onclick="exportToCSV()" title="Экспорт в CSV">📄 CSV</button>
+                            <button class="btn btn-outline-secondary" onclick="printTimesheet()" title="Печать табеля">🖨️ Печать</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <select class="form-select form-select-sm" id="employeeSelect" style="max-width: 250px;" title="Выберите сотрудника">
+                                <option value="">Выберите сотрудника</option>
+                            </select>
+                            <button class="btn btn-sm btn-success" onclick="addEmployee()" title="Добавить сотрудника со всеми ролями">+ Добавить сотрудника</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Легенда цветов -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <small>
+                            <strong>Цветовая схема:</strong>
+                            <span class="badge text-dark" style="background-color: #d1ecf1;">Обычное время</span>
+                            <span class="badge text-dark" style="background-color: #f8d7da;">Переработки</span>
+                            <span class="badge text-dark" style="background-color: #d4edda;">Выездная</span>
+                            <span class="badge text-dark" style="background-color: #e2e3e5;">Модель</span>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Таблица времени -->
+                <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+                    <table class="time-grid" id="timeGrid">
+                        <thead>
+                            <tr>
+                                <th rowspan="3">Сотрудник</th>
+                                <th rowspan="3">Роль</th>
+                                <th rowspan="3">Ставка</th>
+                                <th rowspan="3">Минут<br>отраб.</th>
+                                <th rowspan="3">Часов<br>отраб.</th>
+                                <th rowspan="3">К начисл.</th>
+                                <th colspan="40" id="monthHeader">Август 2024</th>
+                            </tr>
+                            <tr id="dayRow">
+                                <!-- Дни будут добавлены динамически -->
+                            </tr>
+                            <tr id="timeTypeRow">
+                                <!-- Пр/Ух будут добавлены динамически -->
+                            </tr>
+                        </thead>
+                        <tbody id="gridBody">
+                            <!-- Строки будут добавлены динамически -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Итоги -->
+                <div class="mt-3 p-3 bg-light rounded">
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <strong>Общие минуты:</strong><br>
+                            <span id="totalMinutes" class="h5 text-primary">0</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Общие часы:</strong><br>
+                            <span id="totalHours" class="h5 text-info">0.00</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Общая сумма:</strong><br>
+                            <span id="totalAmount" class="h5 text-success">0₽</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Рабочих дней:</strong><br>
+                            <span id="workingDays" class="h5 text-warning">0</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Средняя/день:</strong><br>
+                            <span id="avgDaily" class="h5 text-secondary">0₽</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Средняя/час:</strong><br>
+                            <span id="avgHourly" class="h5 text-dark">0₽</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка статистики -->
+            <div class="tab-pane fade" id="stats" role="tabpanel">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4>Статистика по сотрудникам</h4>
+                        <div id="employeeStats">
+                            <!-- Статистика будет добавлена динамически -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-people"></i> Топ по часам</h5>
+                            </div>
+                            <div class="card-body" id="topHours">
+                                <!-- Топ по часам -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-currency-exchange"></i> Топ по сумме</h5>
+                            </div>
+                            <div class="card-body" id="topEarnings">
+                                <!-- Топ по доходам -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-briefcase"></i> По ролям</h5>
+                            </div>
+                            <div class="card-body" id="roleStats">
+                                <!-- Статистика по ролям -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-calendar3"></i> По дням недели</h5>
+                            </div>
+                            <div class="card-body" id="weekdayStats">
+                                <!-- Статистика по дням недели -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-clock"></i> Временные интервалы</h5>
+                            </div>
+                            <div class="card-body" id="timeIntervalStats">
+                                <!-- Статистика по временным интервалам -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка аналитики -->
+            <div class="tab-pane fade" id="analysis" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <h4>Детальная аналитика</h4>
+                        <div id="analysisCharts">
+                            <!-- Здесь будут графики и диаграммы -->
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                Аналитические графики и диаграммы будут добавлены в следующей версии
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="grid.html" class="btn btn-outline-secondary">← Вернуться к наборной панели</a>
+            <a href="frontend/index.html" class="btn btn-outline-primary">← К основному интерфейсу</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDate = new Date(2024, 7, 1); // Август 2024
+        let employees = [];
+        let roles = [];
+        let timeData = {};
+
+        // Базовая инициализация (вызывается из основной инициализации)
+        function basicInitialization() {
+            initializeData();
+            generateTimeGrid();
+        }
+
+        // Инициализация справочников
+        function initializeData() {
+            employees = [
+                {id: 1, name: 'Яна'},
+                {id: 2, name: 'Илья Полумягкий'},
+                {id: 3, name: 'Ковач Андриана Ивановна'},
+                {id: 4, name: 'Кузьмина Кристина'},
+                {id: 5, name: 'Соколов Савелий Алексеевич'}
+            ];
+
+            roles = [
+                {id: 1, name: 'Ассистент', rate: 312.50, color: '#d1ecf1'},
+                {id: 2, name: 'Ассистент, переработки', rate: 350.00, color: '#f8d7da'},
+                {id: 3, name: 'Выездная', rate: 500.00, color: '#d4edda'},
+                {id: 4, name: 'Модель', rate: 500.00, color: '#e2e3e5'},
+                {id: 5, name: 'Администратор', rate: 375.00, color: '#fff3cd'}
+            ];
+
+            // Заполняем селекты
+            const employeeSelect = document.getElementById('employeeSelect');
+            const roleSelect = document.getElementById('roleSelect');
+
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = emp.name;
+                employeeSelect.appendChild(option);
+            });
+
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.id;
+                option.textContent = `${role.name} (${role.rate}₽/ч)`;
+                roleSelect.appendChild(option);
+            });
+        }
+
+        // Генерация сетки времени
+        function generateTimeGrid() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                              'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            
+            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+            document.getElementById('monthHeader').textContent = `${monthNames[month]} ${year}`;
+            document.getElementById('monthHeader').setAttribute('colspan', daysInMonth * 2);
+
+            // Генерируем заголовки дней
+            const dayRow = document.getElementById('dayRow');
+            const timeTypeRow = document.getElementById('timeTypeRow');
+            
+            dayRow.innerHTML = '';
+            timeTypeRow.innerHTML = '';
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                // День недели
+                const date = new Date(year, month, day);
+                const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                
+                // Заголовок дня (2 колонки: приход и уход)
+                const dayTh = document.createElement('th');
+                dayTh.setAttribute('colspan', 2);
+                dayTh.innerHTML = `${dayNames[date.getDay()]}<br>${day}`;
+                if (isWeekend) dayTh.classList.add('weekend');
+                dayRow.appendChild(dayTh);
+
+                // Приход/Уход
+                const arrivalTh = document.createElement('th');
+                arrivalTh.textContent = 'Пр';
+                arrivalTh.style.width = '40px';
+                if (isWeekend) arrivalTh.classList.add('weekend');
+                timeTypeRow.appendChild(arrivalTh);
+
+                const departureTh = document.createElement('th');
+                departureTh.textContent = 'Ух';
+                departureTh.style.width = '40px';
+                if (isWeekend) departureTh.classList.add('weekend');
+                timeTypeRow.appendChild(departureTh);
+            }
+
+            document.getElementById('gridBody').innerHTML = '';
+            timeData = {};
+            updateTotals();
+        }
+
+        // Добавление сотрудника со всеми ролями
+        function addEmployee() {
+            const employeeId = document.getElementById('employeeSelect').value;
+
+            if (!employeeId) {
+                alert('Выберите сотрудника');
+                return;
+            }
+
+            // Проверяем, что сотрудник еще не добавлен
+            const existingEmployee = Object.keys(timeData).find(rowId => {
+                return timeData[rowId].employeeId == employeeId;
+            });
+
+            if (existingEmployee) {
+                alert('Этот сотрудник уже добавлен');
+                return;
+            }
+
+            const employee = employees.find(e => e.id == employeeId);
+            const timestamp = Date.now();
+            
+            // Создаем строки для всех ролей
+            roles.forEach((role, index) => {
+                const rowId = `${employeeId}_${role.id}_${timestamp + index}`;
+                
+                timeData[rowId] = {
+                    employeeId: employeeId,
+                    employeeName: employee.name,
+                    roleId: role.id,
+                    roleName: role.name,
+                    rate: role.rate,
+                    color: role.color,
+                    times: {},
+                    createdAt: timestamp + index
+                };
+            });
+            
+            renderRows();
+            alert(`Сотрудник "${employee.name}" добавлен со всеми ролями`);
+        }
+
+        // Удаление строки
+        function deleteRow(rowId) {
+            if (confirm('Вы уверены, что хотите удалить эту строку?')) {
+                delete timeData[rowId];
+                renderRows();
+            }
+        }
+
+        // Дублирование строки
+        function duplicateRow(rowId) {
+            const originalData = timeData[rowId];
+            if (!originalData) return;
+
+            const timestamp = Date.now();
+            const newRowId = `${originalData.employeeId}_${originalData.roleId}_${timestamp}`;
+            
+            timeData[newRowId] = {
+                ...originalData,
+                times: {}, // Очищаем время для новой строки
+                createdAt: timestamp,
+                dealInfo: originalData.dealInfo + ' (копия)'
+            };
+
+            renderRows();
+        }
+
+
+        // Отрисовка строк с группировкой по сотрудникам
+        function renderRows() {
+            const tbody = document.getElementById('gridBody');
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            tbody.innerHTML = '';
+
+            // Группируем данные по сотрудникам
+            const employeeGroups = {};
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                if (!employeeGroups[data.employeeId]) {
+                    employeeGroups[data.employeeId] = {
+                        name: data.employeeName,
+                        roles: []
+                    };
+                }
+                employeeGroups[data.employeeId].roles.push({ rowId, data });
+            });
+
+            // Отрисовываем группы
+            Object.keys(employeeGroups).forEach(employeeId => {
+                const group = employeeGroups[employeeId];
+                let employeeTotal = 0;
+                let employeeTotalAmount = 0;
+                
+                group.roles.forEach((roleData, roleIndex) => {
+                    const { rowId, data } = roleData;
+                    const tr = document.createElement('tr');
+
+                    // Ячейка сотрудника (только для первой роли)
+                    if (roleIndex === 0) {
+                        const employeeCell = document.createElement('td');
+                        employeeCell.className = 'employee-name';
+                        employeeCell.textContent = data.employeeName;
+                        employeeCell.rowSpan = group.roles.length + 1; // +1 для итоговой строки
+                        tr.appendChild(employeeCell);
+                    }
+
+                    // Ячейка роли
+                    const roleCell = document.createElement('td');
+                    roleCell.className = 'role-cell';
+                    roleCell.textContent = data.roleName;
+                    roleCell.style.backgroundColor = data.color;
+                    tr.appendChild(roleCell);
+
+                    // Ячейка ставки
+                    const rateCell = document.createElement('td');
+                    rateCell.className = 'rate-cell';
+                    rateCell.textContent = data.rate + '₽';
+                    tr.appendChild(rateCell);
+
+                    // Минуты отработано
+                    const minutesCell = document.createElement('td');
+                    minutesCell.className = 'total-cell';
+                    minutesCell.id = `minutes_${rowId}`;
+                    tr.appendChild(minutesCell);
+
+                    // Часы отработано
+                    const hoursCell = document.createElement('td');
+                    hoursCell.className = 'total-cell';
+                    hoursCell.id = `hours_${rowId}`;
+                    tr.appendChild(hoursCell);
+
+                    // К начислению (только в первой строке сотрудника)
+                    if (roleIndex === 0) {
+                        const amountCell = document.createElement('td');
+                        amountCell.className = 'total-cell employee-total-amount';
+                        amountCell.id = `employee_amount_${data.employeeId}`;
+                        amountCell.rowSpan = group.roles.length;
+                        amountCell.style.backgroundColor = '#d4edda';
+                        amountCell.style.fontWeight = 'bold';
+                        amountCell.style.fontSize = '14px';
+                        amountCell.innerHTML = `₽${Math.round(employeeTotalAmount)}`;
+                        tr.appendChild(amountCell);
+                    }
+
+                    // Ячейки времени для каждого дня
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const date = new Date(year, month, day);
+                        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                        
+                        // Время прихода
+                        const arrivalCell = document.createElement('td');
+                        arrivalCell.className = 'time-cell';
+                        if (isWeekend) arrivalCell.classList.add('weekend');
+                        
+                        const arrivalInput = document.createElement('input');
+                        arrivalInput.type = 'time';
+                        arrivalInput.className = 'time-input';
+                        arrivalInput.value = data.times[day]?.arrival || '';
+                        arrivalInput.addEventListener('change', function() {
+                            updateTimeValue(rowId, day, 'arrival', this.value);
+                        });
+                        
+                        arrivalCell.appendChild(arrivalInput);
+                        tr.appendChild(arrivalCell);
+
+                        // Время ухода
+                        const departureCell = document.createElement('td');
+                        departureCell.className = 'time-cell';
+                        if (isWeekend) departureCell.classList.add('weekend');
+                        
+                        const departureInput = document.createElement('input');
+                        departureInput.type = 'time';
+                        departureInput.className = 'time-input';
+                        departureInput.value = data.times[day]?.departure || '';
+                        departureInput.addEventListener('change', function() {
+                            updateTimeValue(rowId, day, 'departure', this.value);
+                        });
+                        
+                        departureCell.appendChild(departureInput);
+                        tr.appendChild(departureCell);
+
+                        // Применяем цветовую схему если есть время
+                        if (data.times[day]?.arrival || data.times[day]?.departure) {
+                            arrivalCell.style.backgroundColor = data.color;
+                            departureCell.style.backgroundColor = data.color;
+                        }
+                    }
+
+                    tbody.appendChild(tr);
+
+                });
+
+                // Считаем итоги для сотрудника
+                group.roles.forEach(({ rowId, data }) => {
+                    let rowMinutes = 0;
+                    Object.values(data.times).forEach(timeEntry => {
+                        rowMinutes += calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                    });
+                    const rowHours = rowMinutes / 60;
+                    const rowAmount = rowHours * data.rate;
+                    employeeTotal += rowHours;
+                    employeeTotalAmount += rowAmount;
+                });
+
+                // Отрисовываем строки ролей
+                group.roles.forEach((roleData, roleIndex) => {
+                    const { rowId, data } = roleData;
+                    const tr = document.createElement('tr');
+
+                    // Ячейка сотрудника (только для первой роли)
+                    if (roleIndex === 0) {
+                        const employeeCell = document.createElement('td');
+                        employeeCell.className = 'employee-name';
+                        employeeCell.innerHTML = `<input type="text" value="${data.employeeName}" 
+                            onchange="updateEmployeeName(${data.employeeId}, this.value)"
+                            style="border: none; background: transparent; font-weight: bold; width: 100%; padding: 4px;"/>`;
+                        employeeCell.rowSpan = group.roles.length + 1; // +1 для итоговой строки
+                        tr.appendChild(employeeCell);
+                    }
+
+                    // Ячейка роли
+                    const roleCell = document.createElement('td');
+                    roleCell.className = 'role-cell';
+                    roleCell.textContent = data.roleName;
+                    roleCell.style.backgroundColor = data.color;
+                    tr.appendChild(roleCell);
+
+                    // Ячейка ставки
+                    const rateCell = document.createElement('td');
+                    rateCell.className = 'rate-cell';
+                    rateCell.textContent = data.rate + '₽';
+                    tr.appendChild(rateCell);
+
+                    // Минуты отработано
+                    const minutesCell = document.createElement('td');
+                    minutesCell.className = 'total-cell';
+                    minutesCell.id = `minutes_${rowId}`;
+                    tr.appendChild(minutesCell);
+
+                    // Часы отработано
+                    const hoursCell = document.createElement('td');
+                    hoursCell.className = 'total-cell';
+                    hoursCell.id = `hours_${rowId}`;
+                    tr.appendChild(hoursCell);
+
+                    // К начислению (только в первой строке сотрудника)
+                    if (roleIndex === 0) {
+                        const amountCell = document.createElement('td');
+                        amountCell.className = 'total-cell employee-total-amount';
+                        amountCell.id = `employee_amount_${data.employeeId}`;
+                        amountCell.rowSpan = group.roles.length;
+                        amountCell.style.backgroundColor = '#d4edda';
+                        amountCell.style.fontWeight = 'bold';
+                        amountCell.style.fontSize = '14px';
+                        amountCell.innerHTML = `₽${Math.round(employeeTotalAmount)}`;
+                        tr.appendChild(amountCell);
+                    }
+                    tbody.appendChild(tr);
+                });
+
+                // Добавляем итоговую строку для сотрудника
+                const totalTr = document.createElement('tr');
+                totalTr.className = 'summary-row';
+                totalTr.style.backgroundColor = '#f8f9fa';
+                totalTr.style.borderTop = '2px solid #dee2e6';
+
+                // Пустая ячейка для ФИО (уже объединена)
+                
+                // Роль - итого
+                const totalRoleCell = document.createElement('td');
+                totalRoleCell.className = 'role-cell';
+                totalRoleCell.innerHTML = '<strong>Итого часов отработано</strong>';
+                totalRoleCell.style.backgroundColor = '#e9ecef';
+                totalTr.appendChild(totalRoleCell);
+
+                // Пустая ячейка для ставки
+                const emptyCell = document.createElement('td');
+                emptyCell.style.backgroundColor = '#f8f9fa';
+                totalTr.appendChild(emptyCell);
+
+                // Общие часы
+                const totalHoursCell = document.createElement('td');
+                totalHoursCell.className = 'total-cell';
+                totalHoursCell.innerHTML = `<strong>${employeeTotal.toFixed(2)}</strong>`;
+                totalHoursCell.style.backgroundColor = '#d1ecf1';
+                totalTr.appendChild(totalHoursCell);
+
+                // Общая сумма
+                const totalAmountCell = document.createElement('td');
+                totalAmountCell.className = 'total-cell';
+                totalAmountCell.innerHTML = `<strong>р.${Math.round(employeeTotalAmount)}</strong>`;
+                totalAmountCell.style.backgroundColor = '#d4edda';
+                totalTr.appendChild(totalAmountCell);
+
+
+                // Пустые ячейки для всех дней
+                for (let day = 1; day <= daysInMonth; day++) {
+                    for (let timeType = 0; timeType < 2; timeType++) {
+                        const emptyCell = document.createElement('td');
+                        emptyCell.style.backgroundColor = '#f8f9fa';
+                        totalTr.appendChild(emptyCell);
+                    }
+                }
+
+                tbody.appendChild(totalTr);
+            });
+
+            updateTotals();
+            updateStatistics();
+        }
+
+        // Обновление значения времени с валидацией
+        function updateTimeValue(rowId, day, type, value) {
+            if (!timeData[rowId]) return;
+            
+            if (!timeData[rowId].times[day]) {
+                timeData[rowId].times[day] = {};
+            }
+            
+            // Валидация времени
+            if (value) {
+                const otherType = type === 'arrival' ? 'departure' : 'arrival';
+                const otherValue = timeData[rowId].times[day][otherType];
+                
+                if (otherValue && !validateTimeOrder(type === 'arrival' ? value : otherValue, type === 'arrival' ? otherValue : value)) {
+                    alert('Время прихода должно быть раньше времени ухода!');
+                    return;
+                }
+            }
+            
+            timeData[rowId].times[day][type] = value;
+            
+            // Обновляем цвет ячеек с учетом переработок
+            const rowData = timeData[rowId];
+            const minutes = calculateMinutes(rowData.times[day]?.arrival, rowData.times[day]?.departure);
+            let backgroundColor = rowData.color;
+            
+            // Определяем переработки (более 8 часов = 480 минут)
+            if (minutes > 480) {
+                backgroundColor = '#f8d7da'; // Красный для переработок
+            }
+            
+            const rowIndex = Object.keys(timeData).indexOf(rowId);
+            const arrivalCell = document.querySelector(`#gridBody tr:nth-child(${rowIndex + 1}) .time-cell:nth-child(${8 + (day - 1) * 2 + 1})`);
+            const departureCell = document.querySelector(`#gridBody tr:nth-child(${rowIndex + 1}) .time-cell:nth-child(${8 + (day - 1) * 2 + 2})`);
+            
+            if (rowData.times[day]?.arrival || rowData.times[day]?.departure) {
+                if (arrivalCell) arrivalCell.style.backgroundColor = backgroundColor;
+                if (departureCell) departureCell.style.backgroundColor = backgroundColor;
+            }
+            
+            updateTotals();
+            updateStatistics();
+            saveTimesheet(); // Автосохранение
+        }
+
+        // Валидация порядка времени
+        function validateTimeOrder(arrivalTime, departureTime) {
+            if (!arrivalTime || !departureTime) return true;
+            
+            const [arrHour, arrMin] = arrivalTime.split(':').map(Number);
+            const [depHour, depMin] = departureTime.split(':').map(Number);
+            
+            const arrivalMinutes = arrHour * 60 + arrMin;
+            const departureMinutes = depHour * 60 + depMin;
+            
+            return arrivalMinutes < departureMinutes;
+        }
+
+        // Расчет минут между временем прихода и ухода
+        function calculateMinutes(arrival, departure) {
+            if (!arrival || !departure) return 0;
+            
+            const [arrHour, arrMin] = arrival.split(':').map(Number);
+            const [depHour, depMin] = departure.split(':').map(Number);
+            
+            const arrivalMinutes = arrHour * 60 + arrMin;
+            const departureMinutes = depHour * 60 + depMin;
+            
+            let diff = departureMinutes - arrivalMinutes;
+            if (diff < 0) diff += 24 * 60; // Переход через полночь
+            
+            return diff;
+        }
+
+        // Обновление итогов с учетом группировки
+        function updateTotals() {
+            let grandTotalMinutes = 0;
+            let grandTotalAmount = 0;
+            let workingDaysCount = 0;
+
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                let rowMinutes = 0;
+                let rowAmount = 0;
+
+                Object.values(data.times).forEach(timeEntry => {
+                    const minutes = calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                    rowMinutes += minutes;
+                });
+
+                const rowHours = rowMinutes / 60;
+                rowAmount = rowHours * data.rate;
+                
+                grandTotalMinutes += rowMinutes;
+                grandTotalAmount += rowAmount;
+
+                if (Object.keys(data.times).length > 0) {
+                    workingDaysCount = Math.max(workingDaysCount, Object.keys(data.times).length);
+                }
+
+                // Обновляем ячейки итогов по строке
+                const minutesCell = document.getElementById(`minutes_${rowId}`);
+                const hoursCell = document.getElementById(`hours_${rowId}`);
+                const amountCell = document.getElementById(`amount_${rowId}`);
+                
+                if (minutesCell) minutesCell.textContent = rowMinutes;
+                if (hoursCell) hoursCell.textContent = rowHours.toFixed(2);
+                if (amountCell) amountCell.textContent = Math.round(rowAmount) + '₽';
+            });
+
+            const grandTotalHours = grandTotalMinutes / 60;
+
+            // Обновляем общие итоги
+            document.getElementById('totalMinutes').textContent = grandTotalMinutes;
+            document.getElementById('totalHours').textContent = grandTotalHours.toFixed(2);
+            document.getElementById('totalAmount').textContent = Math.round(grandTotalAmount) + '₽';
+            document.getElementById('workingDays').textContent = workingDaysCount;
+            document.getElementById('avgDaily').textContent = workingDaysCount > 0 ? 
+                Math.round(grandTotalAmount / workingDaysCount) + '₽' : '0₽';
+            document.getElementById('avgHourly').textContent = grandTotalHours > 0 ? 
+                Math.round(grandTotalAmount / grandTotalHours) + '₽' : '0₽';
+        }
+
+        // Обновление статистики
+        function updateStatistics() {
+            const employeeStatsDiv = document.getElementById('employeeStats');
+            const topHoursDiv = document.getElementById('topHours');
+            const topEarningsDiv = document.getElementById('topEarnings');
+            const roleStatsDiv = document.getElementById('roleStats');
+
+            // Собираем статистику по сотрудникам
+            const employeeStats = {};
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                if (!employeeStats[data.employeeId]) {
+                    employeeStats[data.employeeId] = {
+                        name: data.employeeName,
+                        totalMinutes: 0,
+                        totalAmount: 0,
+                        roles: {}
+                    };
+                }
+
+                let rowMinutes = 0;
+                Object.values(data.times).forEach(timeEntry => {
+                    rowMinutes += calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                });
+
+                const rowHours = rowMinutes / 60;
+                const rowAmount = rowHours * data.rate;
+
+                employeeStats[data.employeeId].totalMinutes += rowMinutes;
+                employeeStats[data.employeeId].totalAmount += rowAmount;
+                
+                if (!employeeStats[data.employeeId].roles[data.roleId]) {
+                    employeeStats[data.employeeId].roles[data.roleId] = {
+                        name: data.roleName,
+                        minutes: 0,
+                        amount: 0,
+                        color: data.color
+                    };
+                }
+                
+                employeeStats[data.employeeId].roles[data.roleId].minutes += rowMinutes;
+                employeeStats[data.employeeId].roles[data.roleId].amount += rowAmount;
+            });
+
+            // Отображаем статистику по сотрудникам
+            employeeStatsDiv.innerHTML = '';
+            Object.values(employeeStats).forEach(emp => {
+                if (emp.totalMinutes === 0) return;
+
+                const empDiv = document.createElement('div');
+                empDiv.className = 'employee-stats';
+                
+                const hours = (emp.totalMinutes / 60).toFixed(2);
+                empDiv.innerHTML = `
+                    <div class="employee-header">
+                        ${emp.name} - ${hours}ч - ${Math.round(emp.totalAmount)}₽
+                    </div>
+                `;
+
+                Object.values(emp.roles).forEach(role => {
+                    if (role.minutes === 0) return;
+                    
+                    const roleHours = (role.minutes / 60).toFixed(2);
+                    const roleDiv = document.createElement('div');
+                    roleDiv.className = 'role-stats';
+                    roleDiv.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <span style="color: #333;">${role.name}</span>
+                            <span><strong>${roleHours}ч - ${Math.round(role.amount)}₽</strong></span>
+                        </div>
+                        <div class="time-bar">
+                            <div class="time-fill" style="width: ${(role.minutes / emp.totalMinutes) * 100}%; background-color: ${role.color};"></div>
+                        </div>
+                    `;
+                    empDiv.appendChild(roleDiv);
+                });
+
+                employeeStatsDiv.appendChild(empDiv);
+            });
+
+            // Топ по часам
+            const topByHours = Object.values(employeeStats)
+                .filter(emp => emp.totalMinutes > 0)
+                .sort((a, b) => b.totalMinutes - a.totalMinutes)
+                .slice(0, 5);
+
+            topHoursDiv.innerHTML = '';
+            topByHours.forEach((emp, index) => {
+                const hours = (emp.totalMinutes / 60).toFixed(2);
+                const item = document.createElement('div');
+                item.className = 'd-flex justify-content-between mb-2';
+                item.innerHTML = `
+                    <span>${index + 1}. ${emp.name}</span>
+                    <span class="badge bg-primary">${hours}ч</span>
+                `;
+                topHoursDiv.appendChild(item);
+            });
+
+            // Топ по заработкам
+            const topByEarnings = Object.values(employeeStats)
+                .filter(emp => emp.totalAmount > 0)
+                .sort((a, b) => b.totalAmount - a.totalAmount)
+                .slice(0, 5);
+
+            topEarningsDiv.innerHTML = '';
+            topByEarnings.forEach((emp, index) => {
+                const item = document.createElement('div');
+                item.className = 'd-flex justify-content-between mb-2';
+                item.innerHTML = `
+                    <span>${index + 1}. ${emp.name}</span>
+                    <span class="badge bg-success">${Math.round(emp.totalAmount)}₽</span>
+                `;
+                topEarningsDiv.appendChild(item);
+            });
+
+            // Статистика по ролям
+            const roleStats = {};
+            roles.forEach(role => {
+                roleStats[role.id] = {
+                    name: role.name,
+                    totalMinutes: 0,
+                    totalAmount: 0,
+                    color: role.color
+                };
+            });
+
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                let rowMinutes = 0;
+                Object.values(data.times).forEach(timeEntry => {
+                    rowMinutes += calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                });
+                
+                const rowHours = rowMinutes / 60;
+                const rowAmount = rowHours * data.rate;
+
+                roleStats[data.roleId].totalMinutes += rowMinutes;
+                roleStats[data.roleId].totalAmount += rowAmount;
+            });
+
+            roleStatsDiv.innerHTML = '';
+            Object.values(roleStats).forEach(role => {
+                if (role.totalMinutes === 0) return;
+
+                const hours = (role.totalMinutes / 60).toFixed(2);
+                const item = document.createElement('div');
+                item.className = 'mb-3';
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <span style="font-weight: bold;">${role.name}</span>
+                        <span>${hours}ч - ${Math.round(role.totalAmount)}₽</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" style="background-color: ${role.color}; width: 100%;"></div>
+                    </div>
+                `;
+                roleStatsDiv.appendChild(item);
+            });
+        }
+
+        // Загрузка тестовых данных
+        function loadTestData() {
+            // Очищаем предыдущие данные
+            timeData = {};
+
+            // Добавляем по одному сотруднику со всеми ролями
+            const testEmployees = [4, 1]; // Кузьмина и Яна
+            
+            testEmployees.forEach((empId, empIndex) => {
+                const employee = employees.find(e => e.id == empId);
+                const timestamp = Date.now() + empIndex * 1000;
+                
+                // Создаем строки для всех ролей
+                roles.forEach((role, roleIndex) => {
+                    const rowId = `${empId}_${role.id}_${timestamp + roleIndex}`;
+                    
+                    timeData[rowId] = {
+                        employeeId: empId,
+                        employeeName: employee.name,
+                        roleId: role.id,
+                        roleName: role.name,
+                        rate: role.rate,
+                        color: role.color,
+                        times: {},
+                        createdAt: timestamp + roleIndex
+                    };
+                });
+            });
+
+            // Добавляем тестовые времена
+            const rowKeys = Object.keys(timeData);
+            if (rowKeys.length > 0) {
+                // Кузьмина - Ассистент (5 часов)
+                if (rowKeys[0]) timeData[rowKeys[0]].times[23] = {arrival: '09:00', departure: '14:00'};
+                // Кузьмина - Переработки (0 часов)
+                // Кузьмина - Выездная (0 часов)
+                // Кузьмина - Модель (0 часов)
+                
+                // Яна - Ассистент (0 часов)
+                // Яна - Переработки (0 часов)
+                // Яна - Выездная (0 часов)
+                // Яна - Модель (0 часов)
+            }
+
+            renderRows();
+            alert('Тестовые данные загружены! Каждый сотрудник создается со всеми ролями.');
+        }
+
+        // Загрузка данных из localStorage
+        function loadFromStorage() {
+            const savedData = localStorage.getItem('timesheetData');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    
+                    // Проверяем новый формат с метаданными
+                    if (parsed.timeData) {
+                        timeData = parsed.timeData;
+                        if (parsed.currentDate) {
+                            currentDate = new Date(parsed.currentDate);
+                            generateTimeGrid();
+                        }
+                    } else {
+                        // Старый формат - просто данные времени
+                        timeData = parsed;
+                    }
+                    
+                    renderRows();
+                    showNotification('Данные загружены из сохраненного состояния!', 'success');
+                } catch (e) {
+                    showNotification('Ошибка загрузки сохраненных данных: ' + e.message, 'error');
+                }
+            } else {
+                showNotification('Нет сохраненных данных', 'error');
+            }
+        }
+
+        // Навигация по месяцам
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            generateTimeGrid();
+        }
+
+        // Сохранение
+        function saveTimesheet() {
+            console.log('Сохраняем данные:', timeData);
+            const savedData = {
+                timeData: timeData,
+                currentDate: currentDate.toISOString(),
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('timesheetData', JSON.stringify(savedData));
+            showNotification('Данные сохранены!', 'success');
+        }
+
+        // Система уведомлений
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${message}</span>
+                    <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        // Экспорт в CSV
+        function exportToCSV() {
+            let csv = 'Сотрудник,Роль,Ставка,Сделка,Дата,Приход,Уход,Минуты,Сумма\n';
+            
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                Object.keys(data.times).forEach(day => {
+                    const timeEntry = data.times[day];
+                    if (timeEntry.arrival || timeEntry.departure) {
+                        const minutes = calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                        const amount = (minutes / 60) * data.rate;
+                        const date = `${String(day).padStart(2, '0')}.${String(currentDate.getMonth() + 1).padStart(2, '0')}.${currentDate.getFullYear()}`;
+                        
+                        csv += `"${data.employeeName}","${data.roleName}",${data.rate},"${data.dealInfo}","${date}","${timeEntry.arrival || ''}","${timeEntry.departure || ''}",${minutes},${amount.toFixed(2)}\n`;
+                    }
+                });
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `timesheet-${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}.csv`;
+            link.click();
+            
+            showNotification('Экспорт в CSV завершен!', 'success');
+        }
+
+        // Быстрые шаблоны времени
+        function applyTimeTemplate(rowId, template) {
+            if (!timeData[rowId]) return;
+            
+            const templates = {
+                'fullDay': {arrival: '09:00', departure: '18:00'},
+                'halfDay': {arrival: '09:00', departure: '13:00'},
+                'overtime': {arrival: '09:00', departure: '19:00'},
+                'night': {arrival: '22:00', departure: '06:00'}
+            };
+            
+            const templateData = templates[template];
+            if (!templateData) return;
+            
+            // Применяем ко всем рабочим дням месяца
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                
+                if (!isWeekend) { // Только рабочие дни
+                    if (!timeData[rowId].times[day]) {
+                        timeData[rowId].times[day] = {};
+                    }
+                    timeData[rowId].times[day].arrival = templateData.arrival;
+                    timeData[rowId].times[day].departure = templateData.departure;
+                }
+            }
+            
+            renderRows();
+            showNotification(`Шаблон "${template}" применен!`, 'success');
+        }
+
+        // Печать табеля
+        function printTimesheet() {
+            const printWindow = window.open('', '_blank');
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                              'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            
+            let printHTML = `
+                <html>
+                <head>
+                    <title>Табель учета времени - ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; font-size: 10px; }
+                        table { border-collapse: collapse; width: 100%; }
+                        th, td { border: 1px solid #000; padding: 2px; text-align: center; }
+                        .employee-name { text-align: left; font-weight: bold; }
+                        .total-row { background-color: #f0f0f0; font-weight: bold; }
+                        @page { size: A4 landscape; margin: 0.5cm; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Табель учета рабочего времени - ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Сотрудник</th>
+                                <th>Роль</th>
+                                <th>Ставка</th>
+                                <th>Часов</th>
+                                <th>К начислению</th>
+                                <th>Сделка</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            let totalHours = 0;
+            let totalAmount = 0;
+            
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                let rowMinutes = 0;
+                Object.values(data.times).forEach(timeEntry => {
+                    rowMinutes += calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                });
+                
+                const rowHours = rowMinutes / 60;
+                const rowAmount = rowHours * data.rate;
+                totalHours += rowHours;
+                totalAmount += rowAmount;
+                
+                printHTML += `
+                    <tr>
+                        <td class="employee-name">${data.employeeName}</td>
+                        <td>${data.roleName}</td>
+                        <td>${data.rate}₽</td>
+                        <td>${rowHours.toFixed(2)}ч</td>
+                        <td>${Math.round(rowAmount)}₽</td>
+                        <td>${data.dealInfo || ''}</td>
+                    </tr>
+                `;
+            });
+            
+            printHTML += `
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="3">ИТОГО:</td>
+                                <td>${totalHours.toFixed(2)}ч</td>
+                                <td>${Math.round(totalAmount)}₽</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <p>Дата формирования: ${new Date().toLocaleString('ru')}</p>
+                </body>
+                </html>
+            `;
+            
+            printWindow.document.write(printHTML);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Горячие клавиши
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveTimesheet();
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        printTimesheet();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        exportToCSV();
+                        break;
+                }
+            }
+        });
+
+        // Проверка переработок и уведомления
+        function checkOvertimeNotifications() {
+            let overtimeFound = false;
+            
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                Object.keys(data.times).forEach(day => {
+                    const timeEntry = data.times[day];
+                    const minutes = calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                    
+                    if (minutes > 480) { // Более 8 часов
+                        overtimeFound = true;
+                    }
+                });
+            });
+            
+            if (overtimeFound) {
+                showNotification('⚠️ Обнаружены переработки! Проверьте время работы.', 'warning');
+            }
+        }
+
+        // Автоматическое определение выходных и праздников
+        function isHoliday(date) {
+            const holidays = [
+                '01-01', '01-02', '01-03', '01-04', '01-05', '01-06', '01-07', '01-08', // Новый год
+                '02-23', // День защитника Отечества
+                '03-08', // Международный женский день
+                '05-01', // День весны и труда
+                '05-09', // День Победы
+                '06-12', // День России
+                '11-04'  // День народного единства
+            ];
+            
+            const dateString = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            return holidays.includes(dateString);
+        }
+
+        // При переключении на статистику
+        document.getElementById('stats-tab').addEventListener('click', function() {
+            setTimeout(updateStatistics, 100);
+        });
+
+        // Инициализация при загрузке с проверками
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Инициализация системы учета времени v2.0');
+            
+            // Базовая инициализация
+            basicInitialization();
+            
+            // Проверяем есть ли сохраненные данные
+            const savedData = localStorage.getItem('timesheetData');
+            if (savedData) {
+                showNotification('📂 Найдены сохраненные данные. Нажмите "Загрузить" для восстановления.', 'info');
+            } else {
+                // Автоматически загружаем тестовые данные если нет сохраненных
+                setTimeout(() => {
+                    loadTestData();
+                    showNotification('✨ Загружены тестовые данные для демонстрации функций', 'success');
+                }, 1000);
+            }
+            
+            // Проверяем переработки через 2 секунды после загрузки
+            setTimeout(checkOvertimeNotifications, 2000);
+            
+            console.log('✅ Инициализация завершена');
+        });
+    </script>
+</body>
+</html>

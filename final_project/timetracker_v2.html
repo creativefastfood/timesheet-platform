@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учет времени - Временные интервалы</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        .time-grid {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 11px;
+        }
+        .time-grid th, .time-grid td {
+            border: 1px solid #ddd;
+            padding: 2px 4px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .time-grid th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .employee-name {
+            background-color: #e9ecef;
+            font-weight: bold;
+            text-align: left;
+            padding-left: 8px;
+            width: 140px;
+        }
+        .role-cell {
+            background-color: #f8f9fa;
+            text-align: left;
+            padding-left: 8px;
+            width: 100px;
+            font-size: 10px;
+        }
+        .rate-cell {
+            background-color: #fff3cd;
+            width: 70px;
+            font-size: 10px;
+        }
+        .time-cell {
+            width: 30px;
+            height: 30px;
+            position: relative;
+        }
+        .time-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 9px;
+            padding: 0;
+        }
+        .time-input:focus {
+            background-color: #fff3cd;
+            outline: 1px solid #0d6efd;
+        }
+        .worked-time {
+            background-color: #d1ecf1 !important;
+        }
+        .overtime {
+            background-color: #f8d7da !important;
+        }
+        .field-work {
+            background-color: #d4edda !important;
+        }
+        .model-work {
+            background-color: #e2e3e5 !important;
+        }
+        .weekend {
+            background-color: #ffe6e6;
+        }
+        .total-cell {
+            background-color: #d1ecf1;
+            font-weight: bold;
+            width: 80px;
+        }
+        .summary-row {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .stat-card {
+            border-left: 4px solid #0d6efd;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+        .employee-stats {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .employee-header {
+            background: linear-gradient(135deg, #0d6efd, #0056b3);
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+        .role-stats {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .role-stats:last-child {
+            border-bottom: none;
+        }
+        .time-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .time-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Новые стили для поиска и фильтров */
+        .search-highlight {
+            background-color: #fff3cd !important;
+            animation: highlightPulse 2s ease-in-out;
+        }
+        
+        @keyframes highlightPulse {
+            0%, 100% { background-color: #fff3cd; }
+            50% { background-color: #ffc107; }
+        }
+        
+        .filter-row {
+            transition: all 0.3s ease;
+        }
+        
+        .filter-row.hidden {
+            opacity: 0.3;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+        
+        .quick-search-input {
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .quick-search-input:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .filter-button {
+            transition: all 0.2s ease;
+        }
+        
+        .filter-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .filter-button.active {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-down {
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                max-height: 0;
+                opacity: 0;
+            }
+            to {
+                max-height: 200px;
+                opacity: 1;
+            }
+        }
+        
+        /* Улучшенные hover эффекты */
+        .time-input:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            transition: transform 0.1s ease;
+        }
+        
+        .card {
+            transition: all 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .time-cell:hover {
+            transform: scale(1.1);
+            z-index: 5;
+            transition: transform 0.1s ease;
+        }
+        
+        .time-input {
+            transition: all 0.2s ease;
+        }
+        
+        .time-input:focus {
+            transform: scale(1.05);
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0,123,255,0.25);
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #007bff #f1f1f1;
+        }
+        
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border-radius: 10px;
+        }
+        
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #0056b3, #003d82);
+        }
+        
+        .nav-tabs .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-tabs .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .nav-tabs .nav-link:hover::before {
+            left: 100%;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-color: #007bff;
+            transform: translateY(-2px);
+        }
+        
+        .statistics-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .statistics-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .modal.fade .modal-dialog {
+            transform: scale(0.8) translateY(-100px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.show .modal-dialog {
+            transform: scale(1) translateY(0);
+        }
+        
+        .alert {
+            animation: alertSlideIn 0.3s ease;
+        }
+        
+        @keyframes alertSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-overlay.show {
+            opacity: 1;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #ffffff30;
+            border-top: 6px solid #ffffff;
+            border-radius: 50%;
+            animation: megaSpin 1s linear infinite;
+        }
+        
+        @keyframes megaSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pulse-effect {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 0 0 5px rgba(0,123,255,0.5); 
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(0,123,255,0.8), 0 0 30px rgba(0,123,255,0.6); 
+            }
+        }
+        
+        .bounce-in {
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-3">
+        <h2><i class="bi bi-stopwatch"></i> Учет рабочего времени - Временные интервалы</h2>
+        
+        <!-- Навигация -->
+        <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="timesheet-tab" data-bs-toggle="tab" data-bs-target="#timesheet">
+                    <i class="bi bi-table"></i> Табель времени
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats">
+                    <i class="bi bi-bar-chart"></i> Статистика
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis">
+                    <i class="bi bi-pie-chart"></i> Аналитика
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="mainTabContent">
+            <!-- Вкладка табеля -->
+            <div class="tab-pane fade show active" id="timesheet" role="tabpanel">
+                <!-- Управление -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary" onclick="changeMonth(-1)">← Предыдущий</button>
+                        <span class="mx-2" id="currentMonth">Август 2024</span>
+                        <button class="btn btn-outline-primary" onclick="changeMonth(1)">Следующий →</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-success" onclick="saveTimesheet()">💾 Сохранить</button>
+                        <button class="btn btn-info" onclick="loadTestData()">🔄 Загрузить тест</button>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm" id="employeeSelect" style="max-width: 200px;">
+                                <option value="">Выберите сотрудника</option>
+                            </select>
+                            <select class="form-select form-select-sm" id="roleSelect" style="max-width: 180px;">
+                                <option value="">Выберите роль</option>
+                            </select>
+                            <button class="btn btn-sm btn-success" onclick="addRow()">+ Добавить строку</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Поиск и фильтры -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h6 class="mb-0"><i class="bi bi-search"></i> Поиск и фильтры</h6>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="toggleFilters()">
+                                    <i class="bi bi-funnel"></i> <span id="filterToggleText">Показать фильтры</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="clearAllFilters()">
+                                    <i class="bi bi-x-circle"></i> Очистить
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Быстрый поиск -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" id="quickSearch" placeholder="Быстрый поиск по сотрудникам, ролям, суммам..." oninput="applyFilters()">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="clearQuickSearch()">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">💡 Подсказка: используйте ">" и "<" для поиска по суммам (например: ">5000" или "<100ч")</small>
+                            </div>
+                        </div>
+
+                        <!-- Расширенные фильтры -->
+                        <div id="advancedFilters" class="row" style="display: none;">
+                            <div class="col-md-3">
+                                <label class="form-label">Сотрудники:</label>
+                                <select class="form-select form-select-sm" id="filterEmployee" onchange="applyFilters()">
+                                    <option value="">Все сотрудники</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Роли:</label>
+                                <select class="form-select form-select-sm" id="filterRole" onchange="applyFilters()">
+                                    <option value="">Все роли</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Часы от:</label>
+                                <input type="number" class="form-control form-control-sm" id="filterHoursMin" placeholder="0" step="0.5" oninput="applyFilters()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Часы до:</label>
+                                <input type="number" class="form-control form-control-sm" id="filterHoursMax" placeholder="24" step="0.5" oninput="applyFilters()">
+                            </div>
+                            <div class="col-md-3 mt-2">
+                                <label class="form-label">Сумма от (₽):</label>
+                                <input type="number" class="form-control form-control-sm" id="filterAmountMin" placeholder="0" oninput="applyFilters()">
+                            </div>
+                            <div class="col-md-3 mt-2">
+                                <label class="form-label">Сумма до (₽):</label>
+                                <input type="number" class="form-control form-control-sm" id="filterAmountMax" placeholder="100000" oninput="applyFilters()">
+                            </div>
+                            <div class="col-md-3 mt-2">
+                                <label class="form-label">Дата от:</label>
+                                <input type="date" class="form-control form-control-sm" id="filterDateFrom" oninput="applyFilters()">
+                            </div>
+                            <div class="col-md-3 mt-2">
+                                <label class="form-label">Дата до:</label>
+                                <input type="date" class="form-control form-control-sm" id="filterDateTo" oninput="applyFilters()">
+                            </div>
+                        </div>
+
+                        <!-- Быстрые фильтры -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <small class="text-muted me-2">Быстрые фильтры:</small>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="applyQuickFilter('today')">Сегодня</button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="applyQuickFilter('thisWeek')">Эта неделя</button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="applyQuickFilter('overtime')">Переработки</button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="applyQuickFilter('highEarners')">Топ зарплат</button>
+                                <button class="btn btn-sm btn-outline-info me-1" onclick="applyQuickFilter('noData')">Без записей</button>
+                            </div>
+                        </div>
+
+                        <!-- Результаты поиска -->
+                        <div class="mt-3" id="searchResults" style="display: none;">
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-info-circle"></i> Найдено записей: <span id="searchCount">0</span>
+                                <button type="button" class="btn-close float-end" onclick="clearAllFilters()"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Легенда цветов -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <small>
+                            <strong>Цветовая схема:</strong>
+                            <span class="badge text-dark" style="background-color: #d1ecf1;">Обычное время</span>
+                            <span class="badge text-dark" style="background-color: #f8d7da;">Переработки</span>
+                            <span class="badge text-dark" style="background-color: #d4edda;">Выездная</span>
+                            <span class="badge text-dark" style="background-color: #e2e3e5;">Модель</span>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Таблица времени -->
+                <div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+                    <table class="time-grid" id="timeGrid">
+                        <thead>
+                            <tr>
+                                <th rowspan="3">Сотрудник</th>
+                                <th rowspan="3">Роль</th>
+                                <th rowspan="3">Ставка</th>
+                                <th rowspan="3">Минут<br>отраб.</th>
+                                <th rowspan="3">Часов<br>отраб.</th>
+                                <th rowspan="3">К начисл.</th>
+                                <th colspan="40" id="monthHeader">Август 2024</th>
+                            </tr>
+                            <tr id="dayRow">
+                                <!-- Дни будут добавлены динамически -->
+                            </tr>
+                            <tr id="timeTypeRow">
+                                <!-- Пр/Ух будут добавлены динамически -->
+                            </tr>
+                        </thead>
+                        <tbody id="gridBody">
+                            <!-- Строки будут добавлены динамически -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Итоги -->
+                <div class="mt-3 p-3 bg-light rounded">
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <strong>Общие минуты:</strong><br>
+                            <span id="totalMinutes" class="h5 text-primary">0</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Общие часы:</strong><br>
+                            <span id="totalHours" class="h5 text-info">0.00</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Общая сумма:</strong><br>
+                            <span id="totalAmount" class="h5 text-success">0₽</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Рабочих дней:</strong><br>
+                            <span id="workingDays" class="h5 text-warning">0</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Средняя/день:</strong><br>
+                            <span id="avgDaily" class="h5 text-secondary">0₽</span>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Средняя/час:</strong><br>
+                            <span id="avgHourly" class="h5 text-dark">0₽</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка статистики -->
+            <div class="tab-pane fade" id="stats" role="tabpanel">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4>Статистика по сотрудникам</h4>
+                        <div id="employeeStats">
+                            <!-- Статистика будет добавлена динамически -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-people"></i> Топ по часам</h5>
+                            </div>
+                            <div class="card-body" id="topHours">
+                                <!-- Топ по часам -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-currency-exchange"></i> Топ по сумме</h5>
+                            </div>
+                            <div class="card-body" id="topEarnings">
+                                <!-- Топ по доходам -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-briefcase"></i> По ролям</h5>
+                            </div>
+                            <div class="card-body" id="roleStats">
+                                <!-- Статистика по ролям -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-calendar3"></i> По дням недели</h5>
+                            </div>
+                            <div class="card-body" id="weekdayStats">
+                                <!-- Статистика по дням недели -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-clock"></i> Временные интервалы</h5>
+                            </div>
+                            <div class="card-body" id="timeIntervalStats">
+                                <!-- Статистика по временным интервалам -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка аналитики -->
+            <div class="tab-pane fade" id="analysis" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <h4>Детальная аналитика</h4>
+                        <div id="analysisCharts">
+                            <!-- Здесь будут графики и диаграммы -->
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                Аналитические графики и диаграммы будут добавлены в следующей версии
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="grid.html" class="btn btn-outline-secondary">← Вернуться к наборной панели</a>
+            <a href="frontend/index.html" class="btn btn-outline-primary">← К основному интерфейсу</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDate = new Date(2024, 7, 1); // Август 2024
+        let employees = [];
+        let roles = [];
+        let timeData = {};
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeData();
+            generateTimeGrid();
+            loadTestData();
+            initializeFilters();
+            initializeHotkeys();
+        });
+
+        // Инициализация справочников
+        function initializeData() {
+            employees = [
+                {id: 1, name: 'Яна'},
+                {id: 2, name: 'Илья Полумягкий'},
+                {id: 3, name: 'Ковач Андриана Ивановна'},
+                {id: 4, name: 'Кузьмина Кристина'},
+                {id: 5, name: 'Соколов Савелий Алексеевич'}
+            ];
+
+            roles = [
+                {id: 1, name: 'Ассистент', rate: 312.50, color: '#d1ecf1'},
+                {id: 2, name: 'Ассистент, переработки', rate: 350.00, color: '#f8d7da'},
+                {id: 3, name: 'Выездная', rate: 500.00, color: '#d4edda'},
+                {id: 4, name: 'Модель', rate: 500.00, color: '#e2e3e5'},
+                {id: 5, name: 'Администратор', rate: 375.00, color: '#fff3cd'}
+            ];
+
+            // Заполняем селекты
+            const employeeSelect = document.getElementById('employeeSelect');
+            const roleSelect = document.getElementById('roleSelect');
+
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = emp.name;
+                employeeSelect.appendChild(option);
+            });
+
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.id;
+                option.textContent = `${role.name} (${role.rate}₽/ч)`;
+                roleSelect.appendChild(option);
+            });
+        }
+
+        // Генерация сетки времени
+        function generateTimeGrid() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                              'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            
+            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+            document.getElementById('monthHeader').textContent = `${monthNames[month]} ${year}`;
+            document.getElementById('monthHeader').setAttribute('colspan', daysInMonth * 2);
+
+            // Генерируем заголовки дней
+            const dayRow = document.getElementById('dayRow');
+            const timeTypeRow = document.getElementById('timeTypeRow');
+            
+            dayRow.innerHTML = '';
+            timeTypeRow.innerHTML = '';
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                // День недели
+                const date = new Date(year, month, day);
+                const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                
+                // Заголовок дня (2 колонки: приход и уход)
+                const dayTh = document.createElement('th');
+                dayTh.setAttribute('colspan', 2);
+                dayTh.innerHTML = `${dayNames[date.getDay()]}<br>${day}`;
+                if (isWeekend) dayTh.classList.add('weekend');
+                dayRow.appendChild(dayTh);
+
+                // Приход/Уход
+                const arrivalTh = document.createElement('th');
+                arrivalTh.textContent = 'Пр';
+                arrivalTh.style.width = '40px';
+                if (isWeekend) arrivalTh.classList.add('weekend');
+                timeTypeRow.appendChild(arrivalTh);
+
+                const departureTh = document.createElement('th');
+                departureTh.textContent = 'Ух';
+                departureTh.style.width = '40px';
+                if (isWeekend) departureTh.classList.add('weekend');
+                timeTypeRow.appendChild(departureTh);
+            }
+
+            document.getElementById('gridBody').innerHTML = '';
+            timeData = {};
+            updateTotals();
+        }
+
+        // Добавление строки
+        function addRow() {
+            const employeeId = document.getElementById('employeeSelect').value;
+            const roleId = document.getElementById('roleSelect').value;
+
+            if (!employeeId || !roleId) {
+                alert('Выберите сотрудника и роль');
+                return;
+            }
+
+            const employee = employees.find(e => e.id == employeeId);
+            const role = roles.find(r => r.id == roleId);
+            const rowId = `${employeeId}_${roleId}`;
+
+            if (timeData[rowId]) {
+                alert('Такая строка уже существует');
+                return;
+            }
+
+            timeData[rowId] = {
+                employeeId: employeeId,
+                employeeName: employee.name,
+                roleId: roleId,
+                roleName: role.name,
+                rate: role.rate,
+                color: role.color,
+                times: {}
+            };
+
+            renderRows();
+        }
+
+        // Отрисовка строк
+        function renderRows() {
+            const tbody = document.getElementById('gridBody');
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            tbody.innerHTML = '';
+
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                const tr = document.createElement('tr');
+
+                // Ячейка сотрудника
+                const employeeCell = document.createElement('td');
+                employeeCell.className = 'employee-name';
+                employeeCell.textContent = data.employeeName;
+                tr.appendChild(employeeCell);
+
+                // Ячейка роли
+                const roleCell = document.createElement('td');
+                roleCell.className = 'role-cell';
+                roleCell.textContent = data.roleName;
+                roleCell.style.backgroundColor = data.color;
+                tr.appendChild(roleCell);
+
+                // Ячейка ставки
+                const rateCell = document.createElement('td');
+                rateCell.className = 'rate-cell';
+                rateCell.textContent = data.rate + '₽';
+                tr.appendChild(rateCell);
+
+                // Минуты отработано
+                const minutesCell = document.createElement('td');
+                minutesCell.className = 'total-cell';
+                minutesCell.id = `minutes_${rowId}`;
+                tr.appendChild(minutesCell);
+
+                // Часы отработано
+                const hoursCell = document.createElement('td');
+                hoursCell.className = 'total-cell';
+                hoursCell.id = `hours_${rowId}`;
+                tr.appendChild(hoursCell);
+
+                // К начислению
+                const amountCell = document.createElement('td');
+                amountCell.className = 'total-cell';
+                amountCell.id = `amount_${rowId}`;
+                tr.appendChild(amountCell);
+
+                // Ячейки времени для каждого дня
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(year, month, day);
+                    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                    
+                    // Время прихода
+                    const arrivalCell = document.createElement('td');
+                    arrivalCell.className = 'time-cell';
+                    if (isWeekend) arrivalCell.classList.add('weekend');
+                    
+                    const arrivalInput = document.createElement('input');
+                    arrivalInput.type = 'time';
+                    arrivalInput.className = 'time-input';
+                    arrivalInput.value = data.times[day]?.arrival || '';
+                    arrivalInput.addEventListener('change', function() {
+                        updateTimeValue(rowId, day, 'arrival', this.value);
+                    });
+                    
+                    arrivalCell.appendChild(arrivalInput);
+                    tr.appendChild(arrivalCell);
+
+                    // Время ухода
+                    const departureCell = document.createElement('td');
+                    departureCell.className = 'time-cell';
+                    if (isWeekend) departureCell.classList.add('weekend');
+                    
+                    const departureInput = document.createElement('input');
+                    departureInput.type = 'time';
+                    departureInput.className = 'time-input';
+                    departureInput.value = data.times[day]?.departure || '';
+                    departureInput.addEventListener('change', function() {
+                        updateTimeValue(rowId, day, 'departure', this.value);
+                    });
+                    
+                    departureCell.appendChild(departureInput);
+                    tr.appendChild(departureCell);
+
+                    // Применяем цветовую схему если есть время
+                    if (data.times[day]?.arrival || data.times[day]?.departure) {
+                        arrivalCell.style.backgroundColor = data.color;
+                        departureCell.style.backgroundColor = data.color;
+                    }
+                }
+
+                tbody.appendChild(tr);
+            });
+
+            updateTotals();
+            updateStatistics();
+        }
+
+        // Обновление значения времени
+        function updateTimeValue(rowId, day, type, value) {
+            if (!timeData[rowId]) return;
+            
+            if (!timeData[rowId].times[day]) {
+                timeData[rowId].times[day] = {};
+            }
+            
+            timeData[rowId].times[day][type] = value;
+            
+            // Обновляем цвет ячеек
+            const rowData = timeData[rowId];
+            const arrivalCell = document.querySelector(`tr:nth-child(${Object.keys(timeData).indexOf(rowId) + 1}) .time-cell:nth-child(${6 + (day - 1) * 2 + 1})`);
+            const departureCell = document.querySelector(`tr:nth-child(${Object.keys(timeData).indexOf(rowId) + 1}) .time-cell:nth-child(${6 + (day - 1) * 2 + 2})`);
+            
+            if (rowData.times[day]?.arrival || rowData.times[day]?.departure) {
+                if (arrivalCell) arrivalCell.style.backgroundColor = rowData.color;
+                if (departureCell) departureCell.style.backgroundColor = rowData.color;
+            }
+            
+            updateTotals();
+            updateStatistics();
+        }
+
+        // Расчет минут между временем прихода и ухода
+        function calculateMinutes(arrival, departure) {
+            if (!arrival || !departure) return 0;
+            
+            const [arrHour, arrMin] = arrival.split(':').map(Number);
+            const [depHour, depMin] = departure.split(':').map(Number);
+            
+            const arrivalMinutes = arrHour * 60 + arrMin;
+            const departureMinutes = depHour * 60 + depMin;
+            
+            let diff = departureMinutes - arrivalMinutes;
+            if (diff < 0) diff += 24 * 60; // Переход через полночь
+            
+            return diff;
+        }
+
+        // Обновление итогов
+        function updateTotals() {
+            let grandTotalMinutes = 0;
+            let grandTotalAmount = 0;
+            let workingDaysCount = 0;
+
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                let rowMinutes = 0;
+                let rowAmount = 0;
+
+                Object.values(data.times).forEach(timeEntry => {
+                    const minutes = calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                    rowMinutes += minutes;
+                });
+
+                const rowHours = rowMinutes / 60;
+                rowAmount = rowHours * data.rate;
+                
+                grandTotalMinutes += rowMinutes;
+                grandTotalAmount += rowAmount;
+
+                if (Object.keys(data.times).length > 0) {
+                    workingDaysCount = Math.max(workingDaysCount, Object.keys(data.times).length);
+                }
+
+                // Обновляем ячейки итогов по строке
+                const minutesCell = document.getElementById(`minutes_${rowId}`);
+                const hoursCell = document.getElementById(`hours_${rowId}`);
+                const amountCell = document.getElementById(`amount_${rowId}`);
+                
+                if (minutesCell) minutesCell.textContent = rowMinutes;
+                if (hoursCell) hoursCell.textContent = rowHours.toFixed(2);
+                if (amountCell) amountCell.textContent = Math.round(rowAmount) + '₽';
+            });
+
+            const grandTotalHours = grandTotalMinutes / 60;
+
+            // Обновляем общие итоги
+            document.getElementById('totalMinutes').textContent = grandTotalMinutes;
+            document.getElementById('totalHours').textContent = grandTotalHours.toFixed(2);
+            document.getElementById('totalAmount').textContent = Math.round(grandTotalAmount) + '₽';
+            document.getElementById('workingDays').textContent = workingDaysCount;
+            document.getElementById('avgDaily').textContent = workingDaysCount > 0 ? 
+                Math.round(grandTotalAmount / workingDaysCount) + '₽' : '0₽';
+            document.getElementById('avgHourly').textContent = grandTotalHours > 0 ? 
+                Math.round(grandTotalAmount / grandTotalHours) + '₽' : '0₽';
+        }
+
+        // Обновление статистики
+        function updateStatistics() {
+            // Показываем загрузку для статистики
+            const statsContainer = document.querySelector('.tab-content');
+            const existingOverlay = statsContainer?.querySelector('.stats-loading');
+            
+            if (statsContainer && !existingOverlay) {
+                const loadingElement = document.createElement('div');
+                loadingElement.className = 'stats-loading text-center p-3';
+                loadingElement.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Обновление статистики...';
+                statsContainer.appendChild(loadingElement);
+                
+                setTimeout(() => loadingElement.remove(), 500);
+            }
+
+            const employeeStatsDiv = document.getElementById('employeeStats');
+            const topHoursDiv = document.getElementById('topHours');
+            const topEarningsDiv = document.getElementById('topEarnings');
+            const roleStatsDiv = document.getElementById('roleStats');
+
+            // Собираем статистику по сотрудникам
+            const employeeStats = {};
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                if (!employeeStats[data.employeeId]) {
+                    employeeStats[data.employeeId] = {
+                        name: data.employeeName,
+                        totalMinutes: 0,
+                        totalAmount: 0,
+                        roles: {}
+                    };
+                }
+
+                let rowMinutes = 0;
+                Object.values(data.times).forEach(timeEntry => {
+                    rowMinutes += calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                });
+
+                const rowHours = rowMinutes / 60;
+                const rowAmount = rowHours * data.rate;
+
+                employeeStats[data.employeeId].totalMinutes += rowMinutes;
+                employeeStats[data.employeeId].totalAmount += rowAmount;
+                
+                if (!employeeStats[data.employeeId].roles[data.roleId]) {
+                    employeeStats[data.employeeId].roles[data.roleId] = {
+                        name: data.roleName,
+                        minutes: 0,
+                        amount: 0,
+                        color: data.color
+                    };
+                }
+                
+                employeeStats[data.employeeId].roles[data.roleId].minutes += rowMinutes;
+                employeeStats[data.employeeId].roles[data.roleId].amount += rowAmount;
+            });
+
+            // Отображаем статистику по сотрудникам
+            employeeStatsDiv.innerHTML = '';
+            Object.values(employeeStats).forEach((emp, index) => {
+                if (emp.totalMinutes === 0) return;
+
+                const empDiv = document.createElement('div');
+                empDiv.className = 'employee-stats statistics-card card p-3 mb-3';
+                
+                const hours = (emp.totalMinutes / 60).toFixed(2);
+                empDiv.innerHTML = `
+                    <div class="employee-header fw-bold mb-2">
+                        ${emp.name} - <span class="hours-value">${hours}</span>ч - <span class="amount-value">${Math.round(emp.totalAmount)}</span>₽
+                    </div>
+                `;
+
+                Object.values(emp.roles).forEach(role => {
+                    if (role.minutes === 0) return;
+                    
+                    const roleHours = (role.minutes / 60).toFixed(2);
+                    const roleDiv = document.createElement('div');
+                    roleDiv.className = 'role-stats';
+                    roleDiv.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <span style="color: #333;">${role.name}</span>
+                            <span><strong>${roleHours}ч - ${Math.round(role.amount)}₽</strong></span>
+                        </div>
+                        <div class="time-bar">
+                            <div class="time-fill" style="width: ${(role.minutes / emp.totalMinutes) * 100}%; background-color: ${role.color};"></div>
+                        </div>
+                    `;
+                    empDiv.appendChild(roleDiv);
+                });
+
+                employeeStatsDiv.appendChild(empDiv);
+                
+                // Добавляем анимацию появления карточки с задержкой
+                setTimeout(() => {
+                    addBounceEffect(empDiv);
+                    
+                    // Анимируем числовые значения
+                    const hoursEl = empDiv.querySelector('.hours-value');
+                    const amountEl = empDiv.querySelector('.amount-value');
+                    if (hoursEl) animateNumber(hoursEl, 0, parseFloat(hours), 800);
+                    if (amountEl) animateNumber(amountEl, 0, Math.round(emp.totalAmount), 800);
+                }, index * 150);
+            });
+
+            // Топ по часам
+            const topByHours = Object.values(employeeStats)
+                .filter(emp => emp.totalMinutes > 0)
+                .sort((a, b) => b.totalMinutes - a.totalMinutes)
+                .slice(0, 5);
+
+            topHoursDiv.innerHTML = '';
+            topByHours.forEach((emp, index) => {
+                const hours = (emp.totalMinutes / 60).toFixed(2);
+                const item = document.createElement('div');
+                item.className = 'd-flex justify-content-between mb-2 p-2 rounded';
+                item.style.backgroundColor = '#f8f9fa';
+                item.innerHTML = `
+                    <span>${index + 1}. ${emp.name}</span>
+                    <span class="badge bg-primary hours-badge">${hours}</span>ч
+                `;
+                topHoursDiv.appendChild(item);
+                
+                // Анимация появления элемента
+                setTimeout(() => {
+                    animateElement(item, 'fade-in');
+                    const badgeEl = item.querySelector('.hours-badge');
+                    if (badgeEl) animateNumber(badgeEl, 0, parseFloat(hours), 600);
+                }, index * 100);
+            });
+
+            // Топ по заработкам
+            const topByEarnings = Object.values(employeeStats)
+                .filter(emp => emp.totalAmount > 0)
+                .sort((a, b) => b.totalAmount - a.totalAmount)
+                .slice(0, 5);
+
+            topEarningsDiv.innerHTML = '';
+            topByEarnings.forEach((emp, index) => {
+                const item = document.createElement('div');
+                item.className = 'd-flex justify-content-between mb-2 p-2 rounded';
+                item.style.backgroundColor = '#f8f9fa';
+                item.innerHTML = `
+                    <span>${index + 1}. ${emp.name}</span>
+                    <span class="badge bg-success earnings-badge">${Math.round(emp.totalAmount)}</span>₽
+                `;
+                topEarningsDiv.appendChild(item);
+                
+                // Анимация появления элемента
+                setTimeout(() => {
+                    animateElement(item, 'fade-in');
+                    const badgeEl = item.querySelector('.earnings-badge');
+                    if (badgeEl) animateNumber(badgeEl, 0, Math.round(emp.totalAmount), 600);
+                }, index * 100);
+            });
+
+            // Статистика по ролям
+            const roleStats = {};
+            roles.forEach(role => {
+                roleStats[role.id] = {
+                    name: role.name,
+                    totalMinutes: 0,
+                    totalAmount: 0,
+                    color: role.color
+                };
+            });
+
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                let rowMinutes = 0;
+                Object.values(data.times).forEach(timeEntry => {
+                    rowMinutes += calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                });
+                
+                const rowHours = rowMinutes / 60;
+                const rowAmount = rowHours * data.rate;
+
+                roleStats[data.roleId].totalMinutes += rowMinutes;
+                roleStats[data.roleId].totalAmount += rowAmount;
+            });
+
+            roleStatsDiv.innerHTML = '';
+            Object.values(roleStats).forEach(role => {
+                if (role.totalMinutes === 0) return;
+
+                const hours = (role.totalMinutes / 60).toFixed(2);
+                const item = document.createElement('div');
+                item.className = 'mb-3';
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <span style="font-weight: bold;">${role.name}</span>
+                        <span>${hours}ч - ${Math.round(role.totalAmount)}₽</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" style="background-color: ${role.color}; width: 100%;"></div>
+                    </div>
+                `;
+                roleStatsDiv.appendChild(item);
+            });
+        }
+
+        // Загрузка тестовых данных
+        function loadTestData() {
+            const loadBtn = document.querySelector('button[onclick="loadTestData()"]');
+            if (loadBtn) {
+                addPulseEffect(loadBtn, 1000);
+                loadBtn.disabled = true;
+                loadBtn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Загрузка...';
+            }
+            
+            showLoadingOverlay('Загружаем тестовые данные...');
+            
+            setTimeout(() => {
+                // Очищаем предыдущие данные
+                timeData = {};
+
+                // Добавляем тестовые строки
+                const testRows = [
+                    {empId: 4, roleId: 1}, // Кузьмина - Ассистент (как в CSV)
+                    {empId: 1, roleId: 2}, // Яна - Переработки
+                    {empId: 2, roleId: 3}, // Илья - Выездная
+                    {empId: 3, roleId: 4}, // Ковач - Модель
+                    {empId: 5, roleId: 5}  // Соколов - Администратор
+                ];
+
+            testRows.forEach(row => {
+                const employee = employees.find(e => e.id == row.empId);
+                const role = roles.find(r => r.id == row.roleId);
+                const rowId = `${row.empId}_${row.roleId}`;
+
+                timeData[rowId] = {
+                    employeeId: row.empId,
+                    employeeName: employee.name,
+                    roleId: row.roleId,
+                    roleName: role.name,
+                    rate: role.rate,
+                    color: role.color,
+                    times: {}
+                };
+            });
+
+            // Добавляем тестовые времена (из CSV видно что у Кузьмины есть смена 9:00-17:00)
+            timeData['4_1'].times[23] = {arrival: '09:00', departure: '17:00'}; // Кузьмина, 23 августа
+
+            // Добавляем еще несколько тестовых смен
+            timeData['1_2'].times[26] = {arrival: '09:00', departure: '18:00'}; // Яна переработки
+            timeData['2_3'].times[27] = {arrival: '08:00', departure: '17:00'}; // Илья выездная
+            timeData['3_4'].times[28] = {arrival: '10:00', departure: '16:00'}; // Ковач модель
+            timeData['5_5'].times[29] = {arrival: '09:30', departure: '17:30'}; // Соколов админ
+
+                renderRows();
+                hideLoadingOverlay();
+                showNotification('🔄 Тестовые данные успешно загружены!', 'success');
+                
+                if (loadBtn) {
+                    loadBtn.disabled = false;
+                    loadBtn.innerHTML = '🔄 Загрузить тест';
+                    addBounceEffect(loadBtn);
+                }
+                
+                // Анимация таблицы
+                const table = document.querySelector('.time-grid');
+                if (table) animateElement(table, 'fade-in');
+            }, 1000);
+        }
+
+        // Навигация по месяцам
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            generateTimeGrid();
+        }
+
+        // Сохранение
+        function saveTimesheet() {
+            const saveBtn = document.querySelector('button[onclick="saveTimesheet()"]');
+            if (saveBtn) {
+                // Анимация кнопки
+                addPulseEffect(saveBtn, 1000);
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Сохранение...';
+            }
+            
+            showLoadingOverlay('Сохраняем данные...');
+            
+            setTimeout(() => {
+                console.log('Сохраняем данные:', timeData);
+                localStorage.setItem('timesheetData', JSON.stringify(timeData));
+                
+                hideLoadingOverlay();
+                showNotification('💾 Данные успешно сохранены в память браузера!', 'success');
+                
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '💾 Сохранить';
+                    addBounceEffect(saveBtn);
+                }
+            }, 800);
+        }
+
+        // При переключении на статистику
+        // Улучшенное переключение вкладок с анимациями
+        document.getElementById('stats-tab').addEventListener('click', function() {
+            const statsTab = document.querySelector('#statistics');
+            if (statsTab) {
+                showLoadingOverlay('Загружаем статистику...');
+                
+                setTimeout(() => {
+                    updateStatistics();
+                    hideLoadingOverlay();
+                    animateElement(statsTab, 'fade-in');
+                }, 300);
+            }
+        });
+        
+        // Анимация для переключения основной вкладки
+        document.getElementById('timesheet-tab').addEventListener('click', function() {
+            const timesheetTab = document.querySelector('#timesheet');
+            if (timesheetTab) {
+                animateElement(timesheetTab, 'fade-in');
+            }
+        });
+
+        // ================ ФУНКЦИИ ПОИСКА И ФИЛЬТРАЦИИ ================
+
+        let activeFilters = {
+            quickSearch: '',
+            employee: '',
+            role: '',
+            hoursMin: null,
+            hoursMax: null,
+            amountMin: null,
+            amountMax: null,
+            dateFrom: null,
+            dateTo: null
+        };
+
+        // Переключение отображения фильтров
+        function toggleFilters() {
+            const filtersDiv = document.getElementById('advancedFilters');
+            const toggleText = document.getElementById('filterToggleText');
+            
+            if (filtersDiv.style.display === 'none') {
+                filtersDiv.style.display = 'block';
+                filtersDiv.classList.add('slide-down');
+                toggleText.textContent = 'Скрыть фильтры';
+            } else {
+                filtersDiv.style.display = 'none';
+                toggleText.textContent = 'Показать фильтры';
+            }
+        }
+
+        // Применение всех фильтров
+        function applyFilters() {
+            // Сбор значений фильтров
+            activeFilters.quickSearch = document.getElementById('quickSearch')?.value.toLowerCase() || '';
+            activeFilters.employee = document.getElementById('filterEmployee')?.value || '';
+            activeFilters.role = document.getElementById('filterRole')?.value || '';
+            activeFilters.hoursMin = parseFloat(document.getElementById('filterHoursMin')?.value) || null;
+            activeFilters.hoursMax = parseFloat(document.getElementById('filterHoursMax')?.value) || null;
+            activeFilters.amountMin = parseFloat(document.getElementById('filterAmountMin')?.value) || null;
+            activeFilters.amountMax = parseFloat(document.getElementById('filterAmountMax')?.value) || null;
+            activeFilters.dateFrom = document.getElementById('filterDateFrom')?.value || null;
+            activeFilters.dateTo = document.getElementById('filterDateTo')?.value || null;
+
+            let visibleRowsCount = 0;
+            const tbody = document.getElementById('gridBody');
+            const rows = tbody.getElementsByTagName('tr');
+
+            Array.from(rows).forEach((row, index) => {
+                const rowId = Object.keys(timeData)[index];
+                if (!rowId) return;
+
+                const data = timeData[rowId];
+                let shouldShow = true;
+
+                // Фильтр по быстрому поиску
+                if (activeFilters.quickSearch) {
+                    shouldShow = shouldShow && matchesQuickSearch(data, activeFilters.quickSearch);
+                }
+
+                // Фильтр по сотруднику
+                if (activeFilters.employee) {
+                    shouldShow = shouldShow && data.employeeId == activeFilters.employee;
+                }
+
+                // Фильтр по роли
+                if (activeFilters.role) {
+                    shouldShow = shouldShow && data.roleId == activeFilters.role;
+                }
+
+                // Фильтр по часам
+                const rowHours = calculateRowHours(data);
+                if (activeFilters.hoursMin !== null) {
+                    shouldShow = shouldShow && rowHours >= activeFilters.hoursMin;
+                }
+                if (activeFilters.hoursMax !== null) {
+                    shouldShow = shouldShow && rowHours <= activeFilters.hoursMax;
+                }
+
+                // Фильтр по сумме
+                const rowAmount = calculateRowAmount(data);
+                if (activeFilters.amountMin !== null) {
+                    shouldShow = shouldShow && rowAmount >= activeFilters.amountMin;
+                }
+                if (activeFilters.amountMax !== null) {
+                    shouldShow = shouldShow && rowAmount <= activeFilters.amountMax;
+                }
+
+                // Фильтр по датам
+                if (activeFilters.dateFrom || activeFilters.dateTo) {
+                    shouldShow = shouldShow && matchesDateRange(data, activeFilters.dateFrom, activeFilters.dateTo);
+                }
+
+                // Применяем видимость с анимацией
+                row.classList.toggle('filter-row', true);
+                row.classList.toggle('hidden', !shouldShow);
+                
+                // Подсветка найденных элементов
+                if (shouldShow && activeFilters.quickSearch) {
+                    highlightSearchResults(row, activeFilters.quickSearch);
+                } else {
+                    removeHighlight(row);
+                }
+
+                if (shouldShow) visibleRowsCount++;
+            });
+
+            // Обновляем счетчик результатов
+            updateSearchResults(visibleRowsCount);
+        }
+
+        // Проверка соответствия быстрому поиску
+        function matchesQuickSearch(data, query) {
+            // Поиск по имени сотрудника
+            if (data.employeeName.toLowerCase().includes(query)) return true;
+            
+            // Поиск по роли
+            if (data.roleName.toLowerCase().includes(query)) return true;
+            
+            // Поиск по числовым значениям с операторами
+            if (query.startsWith('>') || query.startsWith('<')) {
+                return matchesNumericSearch(data, query);
+            }
+            
+            // Поиск по ставке
+            if (data.rate.toString().includes(query)) return true;
+            
+            return false;
+        }
+
+        // Поиск с числовыми операторами
+        function matchesNumericSearch(data, query) {
+            const operator = query.charAt(0);
+            const value = parseFloat(query.slice(1));
+            
+            if (isNaN(value)) return false;
+            
+            const rowHours = calculateRowHours(data);
+            const rowAmount = calculateRowAmount(data);
+            
+            if (query.includes('ч')) {
+                // Поиск по часам
+                return operator === '>' ? rowHours > value : rowHours < value;
+            } else {
+                // Поиск по сумме
+                return operator === '>' ? rowAmount > value : rowAmount < value;
+            }
+        }
+
+        // Проверка соответствия диапазону дат
+        function matchesDateRange(data, dateFrom, dateTo) {
+            const workDates = Object.keys(data.times);
+            if (workDates.length === 0) return false;
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            return workDates.some(day => {
+                const workDate = new Date(year, month, parseInt(day));
+                const workDateStr = workDate.toISOString().split('T')[0];
+                
+                if (dateFrom && workDateStr < dateFrom) return false;
+                if (dateTo && workDateStr > dateTo) return false;
+                
+                return true;
+            });
+        }
+
+        // Расчет часов для строки
+        function calculateRowHours(data) {
+            let totalMinutes = 0;
+            Object.values(data.times).forEach(timeEntry => {
+                totalMinutes += calculateMinutes(timeEntry.arrival, timeEntry.departure);
+            });
+            return totalMinutes / 60;
+        }
+
+        // Расчет суммы для строки
+        function calculateRowAmount(data) {
+            const hours = calculateRowHours(data);
+            return hours * data.rate;
+        }
+
+        // Подсветка результатов поиска
+        function highlightSearchResults(row, query) {
+            const cells = row.getElementsByTagName('td');
+            Array.from(cells).forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(query)) {
+                    cell.classList.add('search-highlight');
+                }
+            });
+        }
+
+        // Удаление подсветки
+        function removeHighlight(row) {
+            const cells = row.getElementsByTagName('td');
+            Array.from(cells).forEach(cell => {
+                cell.classList.remove('search-highlight');
+            });
+        }
+
+        // Обновление результатов поиска
+        function updateSearchResults(count) {
+            const resultsDiv = document.getElementById('searchResults');
+            const countSpan = document.getElementById('searchCount');
+            
+            const hasFilters = Object.values(activeFilters).some(filter => filter !== '' && filter !== null);
+            
+            if (hasFilters) {
+                resultsDiv.style.display = 'block';
+                countSpan.textContent = count;
+                resultsDiv.classList.add('fade-in');
+            } else {
+                resultsDiv.style.display = 'none';
+            }
+        }
+
+        // Быстрые фильтры
+        function applyQuickFilter(type) {
+            clearAllFilters();
+            
+            const today = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.getMonth();
+            
+            switch (type) {
+                case 'today':
+                    const todayStr = today.toISOString().split('T')[0];
+                    document.getElementById('filterDateFrom').value = todayStr;
+                    document.getElementById('filterDateTo').value = todayStr;
+                    break;
+                    
+                case 'thisWeek':
+                    const startOfWeek = new Date(today);
+                    startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+                    const endOfWeek = new Date(startOfWeek);
+                    endOfWeek.setDate(startOfWeek.getDate() + 6);
+                    
+                    document.getElementById('filterDateFrom').value = startOfWeek.toISOString().split('T')[0];
+                    document.getElementById('filterDateTo').value = endOfWeek.toISOString().split('T')[0];
+                    break;
+                    
+                case 'overtime':
+                    document.getElementById('filterRole').value = '2'; // Переработки
+                    break;
+                    
+                case 'highEarners':
+                    document.getElementById('filterAmountMin').value = '5000';
+                    break;
+                    
+                case 'noData':
+                    // Показать только строки без данных
+                    document.getElementById('filterHoursMax').value = '0';
+                    break;
+            }
+            
+            // Подсветка активной кнопки
+            document.querySelectorAll('.btn-outline-info').forEach(btn => {
+                btn.classList.remove('filter-button', 'active');
+            });
+            
+            event.target.classList.add('filter-button', 'active');
+            
+            applyFilters();
+        }
+
+        // Очистка быстрого поиска
+        function clearQuickSearch() {
+            document.getElementById('quickSearch').value = '';
+            applyFilters();
+        }
+
+        // Очистка всех фильтров
+        function clearAllFilters() {
+            // Очищаем поля
+            document.getElementById('quickSearch').value = '';
+            document.getElementById('filterEmployee').value = '';
+            document.getElementById('filterRole').value = '';
+            document.getElementById('filterHoursMin').value = '';
+            document.getElementById('filterHoursMax').value = '';
+            document.getElementById('filterAmountMin').value = '';
+            document.getElementById('filterAmountMax').value = '';
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+            
+            // Убираем активные кнопки
+            document.querySelectorAll('.filter-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Сбрасываем фильтры
+            activeFilters = {
+                quickSearch: '',
+                employee: '',
+                role: '',
+                hoursMin: null,
+                hoursMax: null,
+                amountMin: null,
+                amountMax: null,
+                dateFrom: null,
+                dateTo: null
+            };
+            
+            applyFilters();
+        }
+
+        // Заполнение фильтров при инициализации
+        function populateFilterSelects() {
+            const employeeFilter = document.getElementById('filterEmployee');
+            const roleFilter = document.getElementById('filterRole');
+            
+            // Заполняем фильтр сотрудников
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = emp.name;
+                employeeFilter.appendChild(option);
+            });
+            
+            // Заполняем фильтр ролей
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.id;
+                option.textContent = role.name;
+                roleFilter.appendChild(option);
+            });
+        }
+
+        // Инициализация фильтров при загрузке данных
+        function initializeFilters() {
+            populateFilterSelects();
+            
+            // Добавляем обработчики событий
+            document.getElementById('quickSearch').addEventListener('input', debounce(applyFilters, 300));
+        }
+
+        // Debounce функция для оптимизации поиска
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // ================ ГОРЯЧИЕ КЛАВИШИ ================
+
+        let hotkeysEnabled = true;
+        let currentFocusedInput = null;
+
+        // Инициализация горячих клавиш
+        function initializeHotkeys() {
+            document.addEventListener('keydown', handleHotkeys);
+            
+            // Отслеживаем фокус на инпутах для отключения горячих клавиш
+            document.addEventListener('focusin', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                    currentFocusedInput = e.target;
+                    hotkeysEnabled = false;
+                }
+            });
+            
+            document.addEventListener('focusout', function(e) {
+                currentFocusedInput = null;
+                hotkeysEnabled = true;
+            });
+            
+            // Показываем подсказку по горячим клавишам
+            showHotkeysTooltip();
+        }
+
+        // Обработчик горячих клавиш
+        function handleHotkeys(event) {
+            // Не обрабатываем если фокус в поле ввода
+            if (!hotkeysEnabled) return;
+            
+            // Ctrl + комбинации
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key.toLowerCase()) {
+                    case 's': // Ctrl+S - Сохранить
+                        event.preventDefault();
+                        saveTimesheet();
+                        showNotification('💾 Данные сохранены!', 'success');
+                        break;
+                        
+                    case 'f': // Ctrl+F - Фокус на поиск
+                        event.preventDefault();
+                        document.getElementById('quickSearch').focus();
+                        showNotification('🔍 Режим поиска активирован', 'info');
+                        break;
+                        
+                    case 'n': // Ctrl+N - Добавить новую строку
+                        event.preventDefault();
+                        focusAddRowControls();
+                        showNotification('➕ Добавление новой строки', 'info');
+                        break;
+                        
+                    case 'r': // Ctrl+R - Обновить данные
+                        event.preventDefault();
+                        loadTestData();
+                        break;
+                        
+                    case 'h': // Ctrl+H - Показать/скрыть справку
+                        event.preventDefault();
+                        toggleHotkeysHelp();
+                        break;
+                        
+                    case 'e': // Ctrl+E - Экспорт
+                        event.preventDefault();
+                        showExportMenu();
+                        break;
+                }
+                return;
+            }
+            
+            // Простые клавиши (без модификаторов)
+            switch (event.key) {
+                case 'Escape':
+                    clearAllFilters();
+                    showNotification('🧹 Фильтры очищены', 'warning');
+                    break;
+                    
+                case '/': // Быстрый поиск (как в GitHub)
+                    event.preventDefault();
+                    document.getElementById('quickSearch').focus();
+                    break;
+                    
+                case '?': // Показать справку
+                    event.preventDefault();
+                    toggleHotkeysHelp();
+                    break;
+                    
+                case 'F1':
+                    event.preventDefault();
+                    toggleHotkeysHelp();
+                    break;
+            }
+            
+            // Цифровые клавиши для быстрых фильтров
+            if (event.key >= '1' && event.key <= '5' && !event.ctrlKey && !event.shiftKey) {
+                const quickFilterMap = {
+                    '1': 'today',
+                    '2': 'thisWeek', 
+                    '3': 'overtime',
+                    '4': 'highEarners',
+                    '5': 'noData'
+                };
+                
+                applyQuickFilter(quickFilterMap[event.key]);
+                showNotification(`🔢 Применен фильтр #${event.key}`, 'info');
+            }
+        }
+
+        // Фокус на элементы добавления строки
+        function focusAddRowControls() {
+            const employeeSelect = document.getElementById('employeeSelect');
+            if (employeeSelect) {
+                employeeSelect.focus();
+            }
+        }
+
+        // Показать меню экспорта
+        function showExportMenu() {
+            const menu = `
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-download"></i> Доступные форматы экспорта:</h6>
+                    <button class="btn btn-sm btn-success me-2" onclick="exportToExcel()">📊 Excel</button>
+                    <button class="btn btn-sm btn-info me-2" onclick="exportToPDF()">📄 PDF</button>
+                    <button class="btn btn-sm btn-warning" onclick="exportToJSON()">📦 JSON</button>
+                </div>
+            `;
+            
+            showModal('Экспорт данных', menu);
+        }
+
+        // Уведомления
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} notification fade-in`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                animation: slideInRight 0.3s ease;
+            `;
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Автоудаление через 3 секунды
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // Показать оверлей загрузки
+        function showLoadingOverlay(message = 'Загрузка...') {
+            let overlay = document.querySelector('.loading-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'loading-overlay';
+                overlay.innerHTML = `
+                    <div class="text-center text-white">
+                        <div class="loading-spinner mb-3"></div>
+                        <div class="loading-message">${message}</div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+            
+            setTimeout(() => overlay.classList.add('show'), 10);
+            return overlay;
+        }
+
+        // Скрыть оверлей загрузки
+        function hideLoadingOverlay() {
+            const overlay = document.querySelector('.loading-overlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+                setTimeout(() => overlay.remove(), 300);
+            }
+        }
+
+        // Анимация появления элементов
+        function animateElement(element, animationType = 'fade-in') {
+            element.classList.add(animationType);
+            
+            // Убираем класс анимации после завершения
+            setTimeout(() => {
+                element.classList.remove(animationType);
+            }, 600);
+        }
+
+        // Пульсирующий эффект для важных элементов
+        function addPulseEffect(element, duration = 3000) {
+            element.classList.add('pulse-effect');
+            setTimeout(() => {
+                element.classList.remove('pulse-effect');
+            }, duration);
+        }
+
+        // Bounce эффект для кнопок и карточек
+        function addBounceEffect(element) {
+            element.classList.add('bounce-in');
+            setTimeout(() => {
+                element.classList.remove('bounce-in');
+            }, 600);
+        }
+
+        // Плавная прокрутка к элементу
+        function smoothScrollTo(element, offset = 0) {
+            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({
+                top: elementPosition,
+                behavior: 'smooth'
+            });
+        }
+
+        // Анимированное изменение числовых значений
+        function animateNumber(element, start, end, duration = 1000) {
+            const range = end - start;
+            const startTime = performance.now();
+
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function для более плавной анимации
+                const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+                const currentValue = Math.round(start + range * easeOutCubic);
+                
+                element.textContent = currentValue;
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+
+            requestAnimationFrame(updateNumber);
+        }
+
+        // Показать модальное окно
+        function showModal(title, content) {
+            const modal = document.createElement('div');
+            modal.className = 'modal fade show';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="btn-close" onclick="this.closest('.modal').remove()"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${content}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Закрытие по клику вне модала
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // Переключение справки по горячим клавишам
+        function toggleHotkeysHelp() {
+            const helpContent = `
+                <div class="hotkeys-help">
+                    <h6><i class="bi bi-keyboard"></i> Горячие клавиши:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Основные действия:</h6>
+                            <kbd>Ctrl+S</kbd> - Сохранить данные<br>
+                            <kbd>Ctrl+F</kbd> - Поиск<br>
+                            <kbd>Ctrl+N</kbd> - Новая строка<br>
+                            <kbd>Ctrl+R</kbd> - Обновить<br>
+                            <kbd>Ctrl+E</kbd> - Экспорт<br>
+                            <kbd>Esc</kbd> - Очистить фильтры<br>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Быстрые фильтры:</h6>
+                            <kbd>1</kbd> - Сегодня<br>
+                            <kbd>2</kbd> - Эта неделя<br>
+                            <kbd>3</kbd> - Переработки<br>
+                            <kbd>4</kbd> - Топ зарплат<br>
+                            <kbd>5</kbd> - Без данных<br>
+                            <kbd>?</kbd> - Эта справка<br>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">💡 Горячие клавиши отключаются при фокусе в полях ввода</small>
+                    </div>
+                </div>
+            `;
+            
+            showModal('Справка по горячим клавишам', helpContent);
+        }
+
+        // Показать подсказку о горячих клавишах при первом запуске
+        function showHotkeysTooltip() {
+            setTimeout(() => {
+                showNotification('💡 Нажмите <kbd>?</kbd> для просмотра горячих клавиш', 'info');
+            }, 2000);
+        }
+
+        // Дополнительные CSS для уведомлений
+        const notificationStyles = document.createElement('style');
+        notificationStyles.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            
+            .hotkeys-help kbd {
+                background-color: #e9ecef;
+                border: 1px solid #adb5bd;
+                border-radius: 3px;
+                color: #495057;
+                display: inline-block;
+                font-size: 0.875em;
+                padding: 2px 4px;
+                margin: 2px;
+            }
+            
+            .notification {
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                border: none;
+            }
+        `;
+        document.head.appendChild(notificationStyles);
+
+        // Функции экспорта (заглушки)
+        function exportToExcel() {
+            showNotification('📊 Экспорт в Excel запущен...', 'success');
+            // Здесь будет реальный экспорт
+        }
+        
+        function exportToPDF() {
+            showNotification('📄 Генерация PDF...', 'info');
+            // Здесь будет генерация PDF
+        }
+        
+        function exportToJSON() {
+            const jsonData = JSON.stringify(timeData, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `timesheet_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('📦 JSON файл загружен!', 'success');
+        }
+    </script>
+</body>
+</html>
