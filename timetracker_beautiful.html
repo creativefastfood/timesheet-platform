@@ -878,17 +878,13 @@
                 const emptyRateCell = document.createElement('td');
                 totalTr.appendChild(emptyRateCell);
 
-                // Пустая ячейка для минут
-                const emptyMinCell = document.createElement('td');
-                totalTr.appendChild(emptyMinCell);
-
-                // Ячейка с общими часами (в колонке ЧАС)
+                // Ячейка с общими часами (в колонке МИН)
                 const totalHoursCell = document.createElement('td');
                 totalHoursCell.className = 'summary-total';
                 totalHoursCell.innerHTML = `<strong>${employeeTotal.toFixed(2)}</strong>`;
                 totalTr.appendChild(totalHoursCell);
 
-                // Ячейка с общей суммой (в колонке СУММА)
+                // Ячейка с общей суммой (в колонке ЧАС)
                 const totalAmountCell = document.createElement('td');
                 totalAmountCell.className = 'summary-total';
                 totalAmountCell.innerHTML = `<strong>₽${Math.round(employeeTotalAmount)}</strong>`;
