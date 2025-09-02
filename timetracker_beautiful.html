@@ -609,13 +609,31 @@
         let timeData = {};
 
         function initializeData() {
-            employees = [
-                {id: 1, name: 'Кобзарев Илья (Полумягкий)', displayName: 'Кобзарев Илья<br>(Полумягкий)'},
-                {id: 2, name: 'Ковач Андриана', displayName: 'Ковач Андриана'},
-                {id: 3, name: 'Кузьмина Кристина', displayName: 'Кузьмина<br>Кристина'},
-                {id: 4, name: 'Соколов Савелий', displayName: 'Соколов<br>Савелий'},
-                {id: 5, name: 'Романова Яна', displayName: 'Романова Яна'}
-            ];
+            // Загружаем сохраненных сотрудников или используем базовый список
+            const savedEmployees = localStorage.getItem('customEmployees');
+            if (savedEmployees) {
+                try {
+                    employees = JSON.parse(savedEmployees);
+                } catch (e) {
+                    // Если ошибка, используем базовый список
+                    employees = [
+                        {id: 1, name: 'Кобзарев Илья (Полумягкий)', displayName: 'Кобзарев Илья<br>(Полумягкий)'},
+                        {id: 2, name: 'Ковач Андриана', displayName: 'Ковач Андриана'},
+                        {id: 3, name: 'Кузьмина Кристина', displayName: 'Кузьмина<br>Кристина'},
+                        {id: 4, name: 'Соколов Савелий', displayName: 'Соколов<br>Савелий'},
+                        {id: 5, name: 'Романова Яна', displayName: 'Романова Яна'}
+                    ];
+                }
+            } else {
+                // Первый запуск - используем базовый список
+                employees = [
+                    {id: 1, name: 'Кобзарев Илья (Полумягкий)', displayName: 'Кобзарев Илья<br>(Полумягкий)'},
+                    {id: 2, name: 'Ковач Андриана', displayName: 'Ковач Андриана'},
+                    {id: 3, name: 'Кузьмина Кристина', displayName: 'Кузьмина<br>Кристина'},
+                    {id: 4, name: 'Соколов Савелий', displayName: 'Соколов<br>Савелий'},
+                    {id: 5, name: 'Романова Яна', displayName: 'Романова Яна'}
+                ];
+            }
 
             roles = [
                 {id: 1, name: 'Ассистент', rate: 312.50, colorClass: 'role-assistant'},
@@ -675,7 +693,7 @@
             }
 
             document.getElementById('gridBody').innerHTML = '';
-            timeData = {};
+            // НЕ очищаем timeData при смене месяца - данные должны сохраняться
             updateTotals();
         }
 
@@ -761,6 +779,8 @@
             
             renderRows();
             autoSave();
+            // Сохраняем обновленный список сотрудников
+            localStorage.setItem('customEmployees', JSON.stringify(employees));
             showNotification(`Новый сотрудник "${trimmedName}" добавлен в таблицу!`, 'success');
         }
 
