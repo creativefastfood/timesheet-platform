@@ -743,7 +743,25 @@
             option.textContent = newEmployee.name;
             employeeSelect.appendChild(option);
             
-            showNotification(`Новый сотрудник "${trimmedName}" добавлен в список!`, 'success');
+            // Автоматически добавляем сотрудника в таблицу со всеми ролями
+            const timestamp = Date.now();
+            roles.forEach((role, index) => {
+                const rowId = `${newId}_${role.id}_${timestamp + index}`;
+                timeData[rowId] = {
+                    employeeId: newId,
+                    employeeName: newEmployee.name,
+                    roleId: role.id,
+                    roleName: role.name,
+                    rate: role.rate,
+                    colorClass: role.colorClass,
+                    times: {},
+                    createdAt: timestamp + index
+                };
+            });
+            
+            renderRows();
+            autoSave();
+            showNotification(`Новый сотрудник "${trimmedName}" добавлен в таблицу!`, 'success');
         }
 
         function renderRows() {
