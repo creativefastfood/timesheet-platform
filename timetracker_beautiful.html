@@ -549,6 +549,13 @@
                     <tbody id="gridBody"></tbody>
                 </table>
             </div>
+            
+            <!-- Кнопка для добавления нового сотрудника -->
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="btn btn-primary btn-modern" onclick="addNewEmployee()" style="font-size: 12px; padding: 12px 24px;">
+                    <i class="bi bi-person-plus-fill"></i> Добавить нового сотрудника
+                </button>
+            </div>
 
             <!-- Итоги -->
             <div class="totals-section">
@@ -710,6 +717,34 @@
             showNotification(`Сотрудник "${employee.name}" добавлен со всеми ролями`, 'success');
         }
 
+        function addNewEmployee() {
+            const newName = prompt('Введите имя и фамилию нового сотрудника:');
+            if (!newName || newName.trim() === '') {
+                return;
+            }
+            
+            const trimmedName = newName.trim();
+            
+            // Создаем нового сотрудника с уникальным ID
+            const newId = Math.max(...employees.map(e => e.id)) + 1;
+            const newEmployee = {
+                id: newId,
+                name: trimmedName,
+                displayName: trimmedName.length > 15 ? trimmedName.replace(/\s+/, '<br>') : trimmedName
+            };
+            
+            // Добавляем в массив сотрудников
+            employees.push(newEmployee);
+            
+            // Обновляем селект
+            const employeeSelect = document.getElementById('employeeSelect');
+            const option = document.createElement('option');
+            option.value = newEmployee.id;
+            option.textContent = newEmployee.name;
+            employeeSelect.appendChild(option);
+            
+            showNotification(`Новый сотрудник "${trimmedName}" добавлен в список!`, 'success');
+        }
 
         function renderRows() {
             const tbody = document.getElementById('gridBody');
