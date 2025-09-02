@@ -473,16 +473,21 @@
         <div class="main-container">
             <!-- Навигация -->
             <div class="navigation" style="background: rgba(255, 255, 255, 0.9); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center;">
-                <a href="timetracker_beautiful.html" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin: 0 10px; text-decoration: none; display: inline-block;">
-                    <i class="bi bi-table me-2"></i>Основная система
-                </a>
-                <a href="helpers_timetracker.html" class="btn btn-outline-primary" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin: 0 10px; text-decoration: none; display: inline-block;">
-                    <i class="bi bi-people me-2"></i>Хэлперы АХО
+                <button class="btn btn-primary nav-btn" onclick="showTab('timesheet')" id="tab-timesheet" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin: 0 5px;">
+                    <i class="bi bi-table me-2"></i>Табель
+                </button>
+                <button class="btn btn-outline-primary nav-btn" onclick="showTab('employees')" id="tab-employees" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin: 0 5px;">
+                    <i class="bi bi-people me-2"></i>Сотрудники
+                </button>
+                <a href="helpers_timetracker.html" class="btn btn-outline-primary" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin: 0 5px; text-decoration: none; display: inline-block;">
+                    <i class="bi bi-people-fill me-2"></i>Хэлперы АХО
                 </a>
             </div>
 
-            <!-- Управление -->
-            <div class="controls-section">
+            <!-- Вкладка Табель -->
+            <div id="timesheet-tab" class="tab-content">
+                <!-- Управление -->
+                <div class="controls-section">
                 <div class="row align-items-center">
                     <div class="col-md-4">
                         <div class="d-flex align-items-center">
@@ -550,13 +555,6 @@
                 </table>
             </div>
             
-            <!-- Кнопка для добавления нового сотрудника -->
-            <div style="text-align: center; margin: 20px 0;">
-                <button class="btn btn-primary btn-modern" onclick="addNewEmployee()" style="font-size: 12px; padding: 12px 24px;">
-                    <i class="bi bi-person-plus-fill"></i> Добавить нового сотрудника
-                </button>
-            </div>
-
             <!-- Итоги -->
             <div class="totals-section">
                 <div class="row">
@@ -598,6 +596,63 @@
                     </div>
                 </div>
             </div>
+            </div>
+            <!-- Закрытие вкладки Табель -->
+
+            <!-- Вкладка Сотрудники -->
+            <div id="employees-tab" class="tab-content" style="display: none;">
+                <div class="controls-section">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h4><i class="bi bi-people me-2"></i>Управление сотрудниками</h4>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-success btn-modern" onclick="addNewEmployeeModal()">
+                                <i class="bi bi-person-plus"></i> Добавить сотрудника
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список сотрудников -->
+                <div class="table-wrapper">
+                    <div class="row" id="employees-grid">
+                        <!-- Сотрудники будут загружены здесь -->
+                    </div>
+                </div>
+
+                <!-- Общая статистика -->
+                <div class="totals-section">
+                    <h5 class="mb-3"><i class="bi bi-bar-chart me-2"></i>Общая статистика</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="total-item">
+                                <div class="total-label">Всего сотрудников</div>
+                                <div class="total-value text-primary" id="totalEmployees">0</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="total-item">
+                                <div class="total-label">Активных в текущем месяце</div>
+                                <div class="total-value text-success" id="activeEmployees">0</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="total-item">
+                                <div class="total-label">Общий фонд ЗП</div>
+                                <div class="total-value text-warning" id="totalSalaryFund">0₽</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="total-item">
+                                <div class="total-label">Средняя ставка</div>
+                                <div class="total-value text-info" id="avgRate">0₽</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -1173,6 +1228,221 @@
                 }, 1500);
             }
         });
+
+        // Функции для работы с вкладками
+        function showTab(tabName) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Обновляем стили кнопок
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = btn.className.replace('btn-primary', 'btn-outline-primary');
+            });
+            
+            // Показываем выбранную вкладку
+            if (tabName === 'timesheet') {
+                document.getElementById('timesheet-tab').style.display = 'block';
+                document.getElementById('tab-timesheet').className = document.getElementById('tab-timesheet').className.replace('btn-outline-primary', 'btn-primary');
+            } else if (tabName === 'employees') {
+                document.getElementById('employees-tab').style.display = 'block';
+                document.getElementById('tab-employees').className = document.getElementById('tab-employees').className.replace('btn-outline-primary', 'btn-primary');
+                renderEmployeesList();
+                updateEmployeeStats();
+            }
+        }
+
+        // Функция для отображения списка сотрудников
+        function renderEmployeesList() {
+            const grid = document.getElementById('employees-grid');
+            grid.innerHTML = '';
+            
+            employees.forEach(employee => {
+                const employeeCard = document.createElement('div');
+                employeeCard.className = 'col-md-6 col-lg-4 mb-3';
+                
+                // Считаем статистику для сотрудника
+                const employeeStats = calculateEmployeeStats(employee.id);
+                
+                employeeCard.innerHTML = `
+                    <div class="card" style="border-radius: 12px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+                        <div class="card-body" style="padding: 20px;">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0" style="color: #2d3748; font-weight: 600;">
+                                    ${employee.name}
+                                </h6>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="editEmployee(${employee.id})">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Часов в месяце</small>
+                                    <div class="fw-bold text-primary">${employeeStats.totalHours.toFixed(1)}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Заработано</small>
+                                    <div class="fw-bold text-success">${employeeStats.totalAmount}₽</div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Ролей</small>
+                                    <div class="fw-bold text-info">${employeeStats.rolesCount}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Рабочих дней</small>
+                                    <div class="fw-bold text-warning">${employeeStats.workingDays}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(employeeCard);
+            });
+        }
+
+        // Функция для расчета статистики сотрудника
+        function calculateEmployeeStats(employeeId) {
+            let totalHours = 0;
+            let totalAmount = 0;
+            let rolesCount = 0;
+            let workingDays = 0;
+            const uniqueDays = new Set();
+
+            Object.keys(timeData).forEach(rowId => {
+                const data = timeData[rowId];
+                if (data.employeeId == employeeId) {
+                    rolesCount++;
+                    Object.keys(data.times).forEach(day => {
+                        const timeEntry = data.times[day];
+                        if (timeEntry.arrival && timeEntry.departure) {
+                            uniqueDays.add(day);
+                            const minutes = calculateMinutes(timeEntry.arrival, timeEntry.departure);
+                            const hours = minutes / 60;
+                            totalHours += hours;
+                            totalAmount += hours * data.rate;
+                        }
+                    });
+                }
+            });
+
+            return {
+                totalHours,
+                totalAmount: Math.round(totalAmount),
+                rolesCount,
+                workingDays: uniqueDays.size
+            };
+        }
+
+        // Функция для обновления общей статистики
+        function updateEmployeeStats() {
+            document.getElementById('totalEmployees').textContent = employees.length;
+            
+            let activeCount = 0;
+            let totalSalaryFund = 0;
+            let totalRates = 0;
+            let ratesCount = 0;
+
+            employees.forEach(employee => {
+                const stats = calculateEmployeeStats(employee.id);
+                if (stats.totalHours > 0) {
+                    activeCount++;
+                    totalSalaryFund += stats.totalAmount;
+                }
+            });
+
+            roles.forEach(role => {
+                totalRates += role.rate;
+                ratesCount++;
+            });
+
+            document.getElementById('activeEmployees').textContent = activeCount;
+            document.getElementById('totalSalaryFund').textContent = Math.round(totalSalaryFund) + '₽';
+            document.getElementById('avgRate').textContent = ratesCount > 0 ? Math.round(totalRates / ratesCount) + '₽' : '0₽';
+        }
+
+        // Функция для добавления нового сотрудника из модального окна
+        function addNewEmployeeModal() {
+            const newName = prompt('Введите имя и фамилию нового сотрудника:');
+            if (!newName || newName.trim() === '') {
+                return;
+            }
+            
+            const trimmedName = newName.trim();
+            
+            // Создаем нового сотрудника с уникальным ID
+            const newId = Math.max(...employees.map(e => e.id)) + 1;
+            const newEmployee = {
+                id: newId,
+                name: trimmedName,
+                displayName: trimmedName.length > 15 ? trimmedName.replace(/\\s+/, '<br>') : trimmedName
+            };
+            
+            // Добавляем в массив сотрудников
+            employees.push(newEmployee);
+            
+            // Обновляем селект в табеле
+            const employeeSelect = document.getElementById('employeeSelect');
+            if (employeeSelect) {
+                const option = document.createElement('option');
+                option.value = newEmployee.id;
+                option.textContent = newEmployee.name;
+                employeeSelect.appendChild(option);
+            }
+            
+            // Сохраняем
+            localStorage.setItem('customEmployees', JSON.stringify(employees));
+            
+            // Обновляем отображение
+            renderEmployeesList();
+            updateEmployeeStats();
+            showNotification(`Новый сотрудник "${trimmedName}" добавлен!`, 'success');
+        }
+
+        // Функция для редактирования сотрудника
+        function editEmployee(employeeId) {
+            const employee = employees.find(e => e.id == employeeId);
+            if (!employee) return;
+            
+            const newName = prompt('Измените имя сотрудника:', employee.name);
+            if (!newName || newName.trim() === '' || newName.trim() === employee.name) {
+                return;
+            }
+            
+            const trimmedName = newName.trim();
+            employee.name = trimmedName;
+            employee.displayName = trimmedName.length > 15 ? trimmedName.replace(/\\s+/, '<br>') : trimmedName;
+            
+            // Обновляем данные в timeData
+            Object.keys(timeData).forEach(rowId => {
+                if (timeData[rowId].employeeId == employeeId) {
+                    timeData[rowId].employeeName = trimmedName;
+                }
+            });
+            
+            // Обновляем селект
+            const employeeSelect = document.getElementById('employeeSelect');
+            if (employeeSelect) {
+                const option = employeeSelect.querySelector(`option[value="${employeeId}"]`);
+                if (option) {
+                    option.textContent = trimmedName;
+                }
+            }
+            
+            // Сохраняем
+            localStorage.setItem('customEmployees', JSON.stringify(employees));
+            autoSave();
+            
+            // Обновляем отображение
+            renderEmployeesList();
+            renderRows(); // Обновляем основную таблицу
+            showNotification(`Сотрудник переименован в "${trimmedName}"`, 'success');
+        }
     </script>
 </body>
 </html>
