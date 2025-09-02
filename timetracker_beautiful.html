@@ -108,25 +108,6 @@
             line-height: 1.3;
         }
 
-        .employee-input {
-            border: none !important;
-            background: transparent !important;
-            color: white !important;
-            font-weight: 600 !important;
-            width: 100% !important;
-            padding: 4px 0 !important;
-            font-size: 14px !important;
-            outline: none !important;
-            word-wrap: break-word !important;
-            white-space: normal !important;
-            line-height: 1.3 !important;
-            resize: none !important;
-        }
-
-        .employee-input:focus {
-            background: rgba(255, 255, 255, 0.2) !important;
-            border-radius: 4px !important;
-        }
 
         /* ЯЧЕЙКИ РОЛЕЙ */
         .role-cell {
@@ -625,8 +606,8 @@
                 {id: 1, name: 'Яна Дым'},
                 {id: 2, name: 'Илья Полумягкий'},
                 {id: 3, name: 'Ковач Андриана Ивановна'},
-                {id: 4, name: 'Кузьмина Кристина'},
-                {id: 5, name: 'Соколов Савелий Алексеевич'}
+                {id: 4, name: 'Кузьмина<br>Кристина'},
+                {id: 5, name: 'Соколов<br>Савелий Алексеевич'}
             ];
 
             roles = [
@@ -728,14 +709,6 @@
             showNotification(`Сотрудник "${employee.name}" добавлен со всеми ролями`, 'success');
         }
 
-        function updateEmployeeName(employeeId, newName) {
-            Object.keys(timeData).forEach(rowId => {
-                if (timeData[rowId].employeeId == employeeId) {
-                    timeData[rowId].employeeName = newName;
-                }
-            });
-            saveTimesheet();
-        }
 
         function renderRows() {
             const tbody = document.getElementById('gridBody');
@@ -782,8 +755,7 @@
                     if (roleIndex === 0) {
                         const employeeCell = document.createElement('td');
                         employeeCell.className = 'employee-name';
-                        employeeCell.innerHTML = `<input type="text" class="employee-input" value="${data.employeeName}" 
-                            onchange="updateEmployeeName(${data.employeeId}, this.value)"/>`;
+                        employeeCell.innerHTML = data.employeeName;
                         employeeCell.rowSpan = group.roles.length + 1;
                         tr.appendChild(employeeCell);
                     }
