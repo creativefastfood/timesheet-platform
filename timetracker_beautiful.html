@@ -889,7 +889,17 @@
                         employeeCell.className = 'employee-name';
                         // Найдем сотрудника для получения displayName
                         const employee = employees.find(emp => emp.id == data.employeeId);
-                        employeeCell.innerHTML = employee ? employee.displayName : data.employeeName;
+                        const employeeName = employee ? employee.displayName : data.employeeName;
+                        
+                        // Добавляем кнопку удаления
+                        employeeCell.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>${employeeName}</span>
+                                <button onclick="removeEmployeeFromTable(${data.employeeId})" 
+                                        style="background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 4px; padding: 2px 6px; font-size: 12px; cursor: pointer; margin-left: 8px;"
+                                        title="Удалить сотрудника из табеля">×</button>
+                            </div>
+                        `;
                         employeeCell.rowSpan = group.roles.length + 1;
                         tr.appendChild(employeeCell);
                     }
@@ -1446,6 +1456,28 @@
             renderEmployeesList();
             renderRows(); // Обновляем основную таблицу
             showNotification(`Сотрудник переименован в "${trimmedName}"`, 'success');
+        }
+
+        // Функция для удаления сотрудника из табеля
+        function removeEmployeeFromTable(employeeId) {
+            const employee = employees.find(e => e.id == employeeId);
+            const employeeName = employee ? employee.name : `ID ${employeeId}`;
+            
+            if (!confirm(`Удалить "${employeeName}" из табеля? Все данные времени будут потеряны.`)) {
+                return;
+            }
+            
+            // Удаляем все строки этого сотрудника из timeData
+            Object.keys(timeData).forEach(rowId => {
+                if (timeData[rowId].employeeId == employeeId) {
+                    delete timeData[rowId];
+                }
+            });
+            
+            // Перерисовываем табель
+            renderRows();
+            autoSave();
+            showNotification(`Сотрудник "${employeeName}" удален из табеля`, 'success');
         }
     </script>
 </body>
